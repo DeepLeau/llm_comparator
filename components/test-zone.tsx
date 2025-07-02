@@ -129,8 +129,7 @@ export function TestZone({ id }: TestZoneProps) {
     setIsLoading(true)
     setResults([])
 
-    // Vérifier la clé API
-    const apiKey = process.env.OPENROUTER_API_KEY
+    const apiKey = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY
     if (!apiKey) {
       console.error("API Key manquante")
       setIsLoading(false)
