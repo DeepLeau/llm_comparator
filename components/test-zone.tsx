@@ -96,9 +96,27 @@ const promptSuggestions = [
   },
   {
     title: "Customer Support Summary",
-    prompt:
-      "Summarize the following customer conversation: the customer complains that their product stopped working after 6 months of use. They are requesting a full refund and threatening to leave a negative review.",
-  },
+    prompt: `Summarize the following customer support conversation:
+
+Customer:  
+Hi, I bought your wireless earbuds in January and they were working fine until recently. Now the left earbud won’t charge at all.  
+
+Support:  
+I’m sorry to hear that. Have you tried cleaning the charging port or using a different cable?  
+
+Customer:  
+Yes, I’ve tried different cables and cleaned the port carefully. Still nothing. Honestly, I’m really disappointed—it’s only been 6 months, and I expected better quality for the price.  
+
+Support:  
+I understand your frustration. Our warranty covers 12 months of use. Would you like a replacement or a refund?  
+
+Customer:  
+I’d prefer a refund. I don’t want to risk the same issue happening again. Also, I was planning to recommend these to friends, but now I’m thinking of leaving a negative review instead.  
+
+Support:  
+We respect your decision. Please allow 5–7 business days for the refund to process. Is there anything else we can do to restore your confidence in our brand?`
+  }
+  ,
   {
     title: "Sales Generation",
     prompt:
