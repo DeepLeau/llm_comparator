@@ -8,6 +8,7 @@ import { SupportedModels } from "@/components/supported-models"
 import { UseCases } from "@/components/use-cases"
 import { FinalCTA } from "@/components/final-cta"
 import { Footer } from "@/components/footer"
+import { ClaritySection } from "@/components/clarity-section"
 
 export default function Home() {
   const [scrollToTest, setScrollToTest] = useState(false)
@@ -22,6 +23,7 @@ export default function Home() {
     <main className="min-h-screen bg-black text-white">
       <Hero onTryNow={handleScrollToTest} />
       <TestZone id="test-zone" />
+      <ClaritySection />
       <Features />
       <SupportedModels />
       <UseCases />

@@ -32,7 +32,7 @@ export function Hero({ onTryNow }: HeroProps) {
           className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm mb-8 transition-all duration-1000 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
         >
           <Sparkles className="w-4 h-4 text-purple-400" />
-          <span className="text-sm text-gray-300">Free & Open Source</span>
+          <span className="text-sm text-gray-300">Free Beta</span>
         </div>
 
         {/* Main heading */}

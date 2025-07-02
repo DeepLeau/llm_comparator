@@ -6,23 +6,23 @@ import { FileText, Zap, BarChart3, Download } from "lucide-react"
 const features = [
   {
     icon: Zap,
-    title: "Comparaison en un clic",
-    description: "Testez votre prompt sur 15+ modèles simultanément en quelques secondes",
+    title: "One‑Click Comparison",
+    description: "Test your prompt on 15+ models simultaneously in seconds",
   },
   {
     icon: FileText,
-    title: "Cas d'usage métier",
-    description: "Templates prêts pour RH, SAV, commercial, résumé et extraction d'infos",
+    title: "Business Use Cases",
+    description: "Ready-made templates for HR, customer support, sales, summarization, and data extraction",
   },
   {
     icon: Download,
-    title: "Export CSV",
-    description: "Exportez tous vos résultats pour analyse et partage avec votre équipe",
+    title: "CSV Export",
+    description: "Download all your results for analysis and team sharing",
   },
   {
     icon: BarChart3,
-    title: "Recommandation automatique",
-    description: "Algorithme intelligent pour identifier le modèle optimal selon vos critères",
+    title: "Smart Recommendation",
+    description: "An intelligent algorithm that identifies the best model based on your criteria",
   },
 ]
 
@@ -32,10 +32,10 @@ export function Features() {
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-            Fonctionnalités Clés
+            Key Features
           </h2>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Tout ce dont vous avez besoin pour choisir le bon modèle IA
+            Everything you need to choose the right AI model
           </p>
         </div>
 

@@ -21,12 +21,11 @@ export function FinalCTA({ onCompareNow }: FinalCTAProps) {
         </div>
 
         <h2 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white via-purple-200 to-blue-200 bg-clip-text text-transparent">
-          Trouvez votre modèle IA idéal
+          Find Your Ideal AI Model
         </h2>
 
         <p className="text-xl text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed">
-          Rejoignez des milliers de développeurs, agences et startups qui utilisent LLM Comparator pour optimiser leurs
-          projets IA.
+          Join thousands of developers, agencies, and startups using LLM Comparator to optimize their AI projects.
         </p>
 
         <Button
@@ -39,7 +38,7 @@ export function FinalCTA({ onCompareNow }: FinalCTAProps) {
         </Button>
 
         <div className="text-center text-gray-500 mt-8">
-          <p>Gratuit • Open source • Sans inscription</p>
+          <p>Free • Beta • No Sign-Up Required</p>
         </div>
       </div>
     </section>

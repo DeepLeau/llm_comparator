@@ -6,33 +6,33 @@ import { Users, Headphones, ShoppingCart, FileText, Mail } from "lucide-react"
 const useCases = [
   {
     icon: Headphones,
-    title: "Support Client (SAV)",
-    description: "Réponses automatiques, classification des tickets, résolution de problèmes",
-    example: "Répondre à une réclamation client de manière empathique et professionnelle",
+    title: "Customer Support",
+    description: "Automated replies, ticket classification, and issue resolution",
+    example: "Responding to a customer complaint with empathy and professionalism",
   },
   {
     icon: Users,
-    title: "Ressources Humaines",
-    description: "Screening CV, rédaction d'offres d'emploi, préparation d'entretiens",
-    example: "Rédiger une offre d'emploi attractive pour un poste de développeur senior",
+    title: "Human Resources",
+    description: "CV screening, job description writing, and interview preparation",
+    example: "Write an attractive job posting for a senior developer position",
   },
   {
     icon: FileText,
-    title: "Résumé de contenu",
-    description: "Synthèse d'articles, rapports, documents longs en points clés",
-    example: "Résumer un rapport financier de 50 pages en 5 points essentiels",
+    title: "Content Summarization",
+    description: "Summarize articles, reports, and long documents into key points",
+    example: "Summarize a 50-page financial report into 5 essential bullet points",
   },
   {
     icon: ShoppingCart,
     title: "E-commerce",
-    description: "Descriptions produits, analyse d'avis, recommandations personnalisées",
-    example: "Créer une description produit convaincante pour une boutique en ligne",
+    description: "Product descriptions, review analysis, and personalized recommendations",
+    example: "Write a compelling product description for an online store",
   },
   {
     icon: Mail,
-    title: "Génération commerciale",
-    description: "Emails de prospection, propositions commerciales, pitchs de vente",
-    example: "Rédiger un email de prospection B2B avec un taux d'ouverture élevé",
+    title: "Sales Generation",
+    description: "Cold emails, business proposals, and sales pitches",
+    example: "Write a high-converting B2B cold email with a strong open rate",
   },
 ]
 
@@ -42,10 +42,10 @@ export function UseCases() {
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-            Cas d'Usage Concrets
+            Real-World Use Cases
           </h2>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Découvrez quel modèle IA excelle dans votre domaine d'activité
+            Find out which AI model performs best in your specific industry
           </p>
         </div>
 
@@ -61,7 +61,7 @@ export function UseCases() {
               <h3 className="text-xl font-semibold text-white mb-4">{useCase.title}</h3>
               <p className="text-gray-400 mb-4 leading-relaxed">{useCase.description}</p>
               <div className="bg-white/5 rounded-lg p-4 border-l-4 border-purple-500">
-                <p className="text-sm text-gray-300 italic">Exemple : {useCase.example}</p>
+                <p className="text-sm text-gray-300 italic">Example : {useCase.example}</p>
               </div>
             </Card>
           ))}
@@ -79,7 +79,7 @@ export function UseCases() {
               <h3 className="text-xl font-semibold text-white mb-4">{useCase.title}</h3>
               <p className="text-gray-400 mb-4 leading-relaxed">{useCase.description}</p>
               <div className="bg-white/5 rounded-lg p-4 border-l-4 border-purple-500">
-                <p className="text-sm text-gray-300 italic">Exemple : {useCase.example}</p>
+                <p className="text-sm text-gray-300 italic">Example : {useCase.example}</p>
               </div>
             </Card>
           ))}

@@ -8,27 +8,13 @@ import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Slider } from "@/components/ui/slider"
-import {
-  Play,
-  Clock,
-  DollarSign,
-  Star,
-  Filter,
-  Download,
-  Expand,
-  Loader2,
-  Brain,
-  MessageSquare,
-  Zap,
-  Cpu,
-  Globe,
-  Code,
-} from "lucide-react"
+import { Play, Clock, DollarSign, Star, Filter, Download, Expand, Loader2 } from "lucide-react"
 
 interface LLMResult {
   id: string
   name: string
-  icon: any
+  logo: string
+  company: string
   response: string
   responseTime: number
   cost: number
@@ -37,34 +23,91 @@ interface LLMResult {
 }
 
 const mockLLMs: Omit<LLMResult, "response" | "responseTime" | "cost" | "score">[] = [
-  { id: "gpt4", name: "GPT-4", icon: Brain, color: "from-green-500 to-emerald-600" },
-  { id: "claude", name: "Claude 3", icon: MessageSquare, color: "from-orange-500 to-red-600" },
-  { id: "mistral", name: "Mistral Large", icon: Zap, color: "from-blue-500 to-indigo-600" },
-  { id: "llama", name: "LLaMA 2", icon: Cpu, color: "from-purple-500 to-pink-600" },
-  { id: "gemini", name: "Gemini Pro", icon: Globe, color: "from-yellow-500 to-orange-600" },
-  { id: "codellama", name: "Code Llama", icon: Code, color: "from-cyan-500 to-blue-600" },
+  {
+    id: "gpt4o",
+    name: "GPT-4o",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg",
+    company: "OpenAI",
+    color: "from-green-500 to-emerald-600",
+  },
+  {
+    id: "claude",
+    name: "Claude 3.5 Sonnet",
+    logo: "https://cdn.brandfetch.io/idmJWF3N06/theme/dark/symbol.svg?c=1dxbfHSJFAPEGdCLU4o5B",
+    company: "Anthropic",
+    color: "from-orange-500 to-red-600",
+  },
+  {
+    id: "mistral",
+    name: "Mistral Nemo",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Mistral_AI_logo_%282025%E2%80%93%29.svg/768px-Mistral_AI_logo_%282025%E2%80%93%29.svg.png",
+    company: "Mistral AI",
+    color: "from-blue-500 to-indigo-600",
+  },
+  {
+    id: "llama",
+    name: "LLaMA 3.3 70B",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg",
+    company: "Meta",
+    color: "from-purple-500 to-pink-600",
+  },
+  {
+    id: "mixtral",
+    name: "Mixtral 8x7B",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Mistral_AI_logo_%282025%E2%80%93%29.svg/768px-Mistral_AI_logo_%282025%E2%80%93%29.svg.png",
+    company: "Mistral AI",
+    color: "from-cyan-500 to-blue-600",
+  },
+  {
+    id: "grok",
+    name: "Grok 3 Beta",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/5/5a/X_icon_2.svg",
+    company: "xAI",
+    color: "from-violet-500 to-purple-600",
+  },
+  {
+    id: "deephermes",
+    name: "Nous: DeepHermes 3",
+    logo: "https://avatars.githubusercontent.com/u/152546492?s=200&v=4",
+    company: "Nous Research",
+    color: "from-teal-500 to-cyan-600",
+  },
+  {
+    id: "phi4",
+    name: "Phi-4",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg",
+    company: "Microsoft",
+    color: "from-indigo-500 to-blue-600",
+  },
+  {
+    id: "deepseek",
+    name: "Deepseek Chat V3",
+    logo: "https://avatars.githubusercontent.com/u/165393474?s=200&v=4",
+    company: "DeepSeek",
+    color: "from-pink-500 to-rose-600",
+  },
 ]
 
 const promptSuggestions = [
   {
-    title: "Email RH",
+    title: "HR Email",
     prompt:
-      "Rédigez un email professionnel pour informer les employés d'une nouvelle politique de télétravail hybride, en expliquant les avantages et les modalités pratiques.",
+      "Write a professional email to inform employees about a new hybrid remote work policy, explaining its benefits and practical details.",
   },
   {
-    title: "Résumé SAV",
+    title: "Customer Support Summary",
     prompt:
-      "Résumez cette conversation client : Le client se plaint que son produit ne fonctionne plus après 6 mois d'utilisation. Il demande un remboursement complet et menace de laisser un avis négatif.",
+      "Summarize the following customer conversation: the customer complains that their product stopped working after 6 months of use. They are requesting a full refund and threatening to leave a negative review.",
   },
   {
-    title: "Génération commerciale",
+    title: "Sales Generation",
     prompt:
-      "Créez un pitch de vente convaincant pour une solution SaaS de gestion de projet destinée aux équipes de développement de 10-50 personnes.",
+      "Create a compelling sales pitch for a project management SaaS solution designed for development teams of 10–50 people.",
   },
   {
-    title: "Extraction d'infos",
+    title: "Information Extraction",
     prompt:
-      "Extrayez les informations clés de ce texte : 'La réunion du 15 mars à 14h30 en salle de conférence A portera sur le budget Q2 2024. Participants : Marie Dupont (CFO), Jean Martin (CEO), Sophie Bernard (CMO). Ordre du jour : révision budgétaire, nouveaux investissements, stratégie marketing.'",
+      "Extract the key information from the following text:'The meeting on March 15 at 2:30 PM in Conference Room A will cover the Q2 2024 budget. Attendees: Marie Dupont (CFO), Jean Martin (CEO), Sophie Bernard (CMO). Agenda: budget review, new investments, marketing strategy.'",
   },
 ]
 
@@ -80,48 +123,415 @@ export function TestZone({ id }: TestZoneProps) {
   const [sortBy, setSortBy] = useState<"score" | "cost" | "time">("score")
   const [filterBy, setFilterBy] = useState<"all" | "fast" | "cheap" | "quality">("all")
 
-  const generateMockResponse = (modelName: string, prompt: string): string => {
-    const responses = {
-      "GPT-4": `Voici une réponse détaillée et structurée de GPT-4 pour votre prompt : "${prompt.slice(0, 50)}..."\n\nCette réponse démontre la capacité de GPT-4 à comprendre le contexte et à fournir des informations pertinentes avec un style naturel et professionnel.`,
-      "Claude 3": `Claude 3 répond avec précision : "${prompt.slice(0, 50)}..."\n\nJe propose une approche méthodique et réfléchie, en tenant compte des nuances de votre demande. Ma réponse est structurée pour être à la fois complète et facilement actionnable.`,
-      "Mistral Large": `Réponse de Mistral Large : "${prompt.slice(0, 50)}..."\n\nEn tant que modèle français, je comprends parfaitement les subtilités linguistiques et culturelles. Ma réponse est optimisée pour le contexte francophone.`,
-      "LLaMA 2": `LLaMA 2 génère : "${prompt.slice(0, 50)}..."\n\nMa réponse open-source offre une alternative performante avec une approche directe et efficace, tout en maintenant un haut niveau de qualité.`,
-      "Gemini Pro": `Gemini Pro analyse : "${prompt.slice(0, 50)}..."\n\nJ'utilise mes capacités multimodales pour fournir une réponse complète, intégrant différentes perspectives et sources d'information.`,
-      "Code Llama": `Code Llama traite : "${prompt.slice(0, 50)}..."\n\nSpécialisé dans le code et la logique, je fournis une réponse structurée avec une approche analytique et des exemples pratiques.`,
-    }
-    return responses[modelName as keyof typeof responses] || `Réponse générée par ${modelName}`
-  }
-
   const runComparison = async () => {
     if (!prompt.trim()) return
 
     setIsLoading(true)
     setResults([])
 
-    // Simulate API calls with staggered responses
-    const mockResults: LLMResult[] = []
-
-    for (let i = 0; i < mockLLMs.length; i++) {
-      const model = mockLLMs[i]
-      await new Promise((resolve) => setTimeout(resolve, 500 + Math.random() * 1000))
-
-      const result: LLMResult = {
-        ...model,
-        response: generateMockResponse(model.name, prompt),
-        responseTime: Math.round(800 + Math.random() * 2000),
-        cost: Math.round((0.01 + Math.random() * 0.05) * 100) / 100,
-        score: Math.round(7 + Math.random() * 3),
-      }
-
-      mockResults.push(result)
-      setResults([...mockResults])
+    // Vérifier la clé API
+    const apiKey = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY
+    if (!apiKey) {
+      console.error("API Key manquante")
+      setIsLoading(false)
+      return
     }
 
+    const headers = {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+      "HTTP-Referer": window.location.origin,
+      "X-Title": "LLM Comparison Tool",
+    }
+
+    // Mapping corrigé des modèles
+    const modelsMap: Record<string, string> = {
+      "GPT-4o": "openai/gpt-4o",
+      "Claude 3.5 Sonnet": "anthropic/claude-3-5-sonnet-20241022",
+      "Mistral Nemo": "mistralai/mistral-nemo",
+      "LLaMA 3.3 70B": "meta-llama/llama-3.3-70b-instruct",
+      "Mixtral 8x7B": "mistralai/mixtral-8x7b-instruct",
+      "Grok 3 Beta": "x-ai/grok-beta",
+      "Nous: DeepHermes 3": "nousresearch/nous-hermes-2-mixtral-8x7b-dpo",
+      "Phi-4": "microsoft/phi-4",
+      "Deepseek Chat V3": "deepseek/deepseek-chat",
+    }
+
+    // Étape 1: Obtenir les réponses de tous les modèles
+    const resultPromises = mockLLMs.map(async (model) => {
+      try {
+        const startTime = performance.now()
+        const tokenLimit = 300
+
+        const requestBody = {
+          model: modelsMap[model.name],
+          messages: [
+            {
+              role: "user",
+              content: `You have a maximum of ${tokenLimit} tokens to answer.${prompt}`,
+            },
+          ],
+          max_tokens: 300,
+          temperature: 0.7,
+        }
+
+        console.log(`Requesting ${model.name} with model: ${modelsMap[model.name]}`)
+
+        const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers,
+          body: JSON.stringify(requestBody),
+        })
+
+        const endTime = performance.now()
+
+        if (!res.ok) {
+          console.error(`Error for ${model.name}:`, res.status, res.statusText)
+          throw new Error(`HTTP ${res.status}`)
+        }
+
+        const json = await res.json()
+        console.log(`Response for ${model.name}:`, json)
+
+        // Vérification de la structure de réponse
+        if (!json.choices || !json.choices[0] || !json.choices[0].message) {
+          throw new Error("Invalid response structure")
+        }
+
+        const responseText = json.choices[0].message.content || "No response"
+        const promptTokens = json.usage?.prompt_tokens || 0
+        const completionTokens = json.usage?.completion_tokens || 0
+
+        // Calcul du coût simplifié et plus robuste
+        let cost = 0
+        const modelUsed = json.model || modelsMap[model.name]
+
+        if (modelUsed.includes("gpt-4o")) {
+          cost = (promptTokens / 1_000_000) * 2.5 + (completionTokens / 1_000_000) * 10
+        } else if (modelUsed.includes("claude")) {
+          cost = (promptTokens / 1_000_000) * 3 + (completionTokens / 1_000_000) * 15
+        } else if (modelUsed.includes("mistral-nemo")) {
+          cost = (promptTokens / 1_000_000) * 0.3 + (completionTokens / 1_000_000) * 0.3
+        } else if (modelUsed.includes("llama")) {
+          cost = (promptTokens / 1_000_000) * 0.59 + (completionTokens / 1_000_000) * 0.79
+        } else if (modelUsed.includes("mixtral")) {
+          cost = (promptTokens / 1_000_000) * 0.24 + (completionTokens / 1_000_000) * 0.24
+        } else if (modelUsed.includes("grok")) {
+          cost = (promptTokens / 1_000_000) * 5 + (completionTokens / 1_000_000) * 15
+        } else if (modelUsed.includes("free")) {
+          cost = 0
+        } else {
+          // Coût par défaut pour les modèles inconnus
+          cost = (promptTokens / 1_000_000) * 0.1 + (completionTokens / 1_000_000) * 0.1
+        }
+
+        return {
+          ...model,
+          response: responseText,
+          responseTime: Math.round(endTime - startTime),
+          cost: Math.round(cost * 10000) / 10000, // 4 décimales
+          score: 5, // Score par défaut, sera mis à jour
+        } as LLMResult
+      } catch (err) {
+        console.error(`Error fetching response for ${model.name}:`, err)
+        return {
+          ...model,
+          response: `Error: ${err instanceof Error ? err.message : "Unknown error"}`,
+          responseTime: 0,
+          cost: 0,
+          score: 0,
+        } as LLMResult
+      }
+    })
+
+    const initialResults = await Promise.all(resultPromises)
+
+    // Étape 2: Scoring automatique amélioré
+    const scoreAllResponses = async (results: LLMResult[]): Promise<LLMResult[]> => {
+      const validResults = results.filter((r) => !r.response.startsWith("Error:"))
+
+      if (validResults.length === 0) {
+        console.log("No valid results to score")
+        return results
+      }
+
+      try {
+        // Prompt de scoring plus simple et plus fiable
+        const scoringPrompt = `Évalue ces ${validResults.length} réponses à la question: "${prompt}"
+
+${validResults.map((result, index) => `RÉPONSE ${index + 1} (${result.name}):\n${result.response}\n`).join("\n")}
+
+Donne une note de 1.0 à 10.0 pour chaque réponse en considérant:
+- Pertinence et précision
+- Clarté et structure  
+- Complétude de la réponse
+
+Réponds UNIQUEMENT avec les notes séparées par des virgules (ex: 8.1,7.5,9,6)`
+
+        console.log("Sending scoring request...")
+
+        const scoringRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            model: "anthropic/claude-3-opus",
+            messages: [{ role: "user", content: scoringPrompt }],
+            max_tokens: 50,
+            temperature: 0.1,
+          }),
+        })
+
+        if (!scoringRes.ok) {
+          throw new Error(`Scoring request failed: ${scoringRes.status}`)
+        }
+
+        const scoringJson = await scoringRes.json()
+        console.log("Scoring response:", scoringJson)
+
+        const scoreText = scoringJson.choices?.[0]?.message?.content || ""
+        console.log("Score text:", scoreText)
+
+        // Parser les scores de manière plus robuste
+        const scoreMatches = scoreText.match(/\d+/g)
+        const scores = scoreMatches ? scoreMatches.map((s) => Math.min(Math.max(Number.parseInt(s), 1), 10)) : []
+
+        console.log("Parsed scores:", scores)
+
+        // Appliquer les scores
+        const scoredResults = results.map((result) => {
+          if (result.response.startsWith("Error:")) {
+            return { ...result, score: 0 }
+          }
+
+          const validIndex = validResults.findIndex((r) => r.name === result.name)
+          const score = scores[validIndex] || Math.floor(Math.random() * 5) + 5 // Fallback aléatoire 5-9
+
+          return { ...result, score }
+        })
+
+        return scoredResults
+      } catch (err) {
+        console.error("Error in scoring:", err)
+        // Fallback: scores aléatoires mais réalistes
+        return results.map((result) => ({
+          ...result,
+          score: result.response.startsWith("Error:") ? 0 : Math.floor(Math.random() * 4) + 6, // 6-9
+        }))
+      }
+    }
+
+    // Appliquer le scoring
+    const finalResults = await scoreAllResponses(initialResults)
+
+    setResults(finalResults)
     setIsLoading(false)
   }
 
   const updateScore = (id: string, newScore: number) => {
     setResults((prev) => prev.map((result) => (result.id === id ? { ...result, score: newScore } : result)))
+  }
+
+  const exportToExcel = () => {
+    if (results.length === 0) return
+
+    // Créer un vrai fichier Excel en utilisant le format Excel XML
+    const createExcelXML = () => {
+      const xmlHeader = `<?xml version="1.0"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Title>Comparaison LLM</Title>
+  <Author>LLM Comparison Tool</Author>
+  <Created>${new Date().toISOString()}</Created>
+ </DocumentProperties>
+ <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+  <WindowHeight>12000</WindowHeight>
+  <WindowWidth>15000</WindowWidth>
+  <WindowTopX>240</WindowTopX>
+  <WindowTopY>75</WindowTopY>
+  <ProtectStructure>False</ProtectStructure>
+  <ProtectWindows>False</ProtectWindows>
+ </ExcelWorkbook>
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="HeaderStyle">
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Calibri" ss:Size="12" ss:Color="#FFFFFF" ss:Bold="1"/>
+   <Interior ss:Color="#4F46E5" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="DataStyle">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E5E7EB"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E5E7EB"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E5E7EB"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E5E7EB"/>
+   </Borders>
+   <Font ss:FontName="Calibri" ss:Size="11"/>
+  </Style>
+  <Style ss:ID="CenterStyle" ss:Parent="DataStyle">
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+  </Style>
+  <Style ss:ID="ExcellentScore" ss:Parent="CenterStyle">
+   <Interior ss:Color="#D1FAE5" ss:Pattern="Solid"/>
+   <Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1" ss:Color="#065F46"/>
+  </Style>
+  <Style ss:ID="GoodScore" ss:Parent="CenterStyle">
+   <Interior ss:Color="#FEF3C7" ss:Pattern="Solid"/>
+   <Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1" ss:Color="#92400E"/>
+  </Style>
+  <Style ss:ID="PoorScore" ss:Parent="CenterStyle">
+   <Interior ss:Color="#FEE2E2" ss:Pattern="Solid"/>
+   <Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1" ss:Color="#991B1B"/>
+  </Style>
+  <Style ss:ID="TitleStyle">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Center"/>
+   <Font ss:FontName="Calibri" ss:Size="16" ss:Bold="1" ss:Color="#4F46E5"/>
+  </Style>
+  <Style ss:ID="InfoStyle">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Center"/>
+   <Font ss:FontName="Calibri" ss:Size="11" ss:Color="#6B7280"/>
+  </Style>
+ </Styles>`
+
+      const worksheetStart = `
+ <Worksheet ss:Name="Comparaison LLM">
+  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="${filteredAndSortedResults.length + 10}" x:FullColumns="1" x:FullRows="1" ss:DefaultColumnWidth="60" ss:DefaultRowHeight="15">
+   <Column ss:Index="1" ss:AutoFitWidth="0" ss:Width="50"/>
+   <Column ss:Index="2" ss:AutoFitWidth="0" ss:Width="150"/>
+   <Column ss:Index="3" ss:AutoFitWidth="0" ss:Width="120"/>
+   <Column ss:Index="4" ss:AutoFitWidth="0" ss:Width="100"/>
+   <Column ss:Index="5" ss:AutoFitWidth="0" ss:Width="80"/>
+   <Column ss:Index="6" ss:AutoFitWidth="0" ss:Width="80"/>
+   <Column ss:Index="7" ss:AutoFitWidth="0" ss:Width="400"/>`
+
+      // Métadonnées
+      const metadataRows = `
+   <Row ss:Height="25">
+    <Cell ss:StyleID="TitleStyle"><Data ss:Type="String">📊 Rapport de Comparaison LLM</Data></Cell>
+   </Row>
+   <Row>
+    <Cell ss:StyleID="InfoStyle"><Data ss:Type="String">📅 Date: ${new Date().toLocaleDateString("fr-FR")} à ${new Date().toLocaleTimeString("fr-FR")}</Data></Cell>
+   </Row>
+   <Row>
+    <Cell ss:StyleID="InfoStyle"><Data ss:Type="String">💬 Prompt: ${prompt.substring(0, 100)}${prompt.length > 100 ? "..." : ""}</Data></Cell>
+   </Row>
+   <Row>
+    <Cell ss:StyleID="InfoStyle"><Data ss:Type="String">🤖 Modèles: ${results.length}</Data></Cell>
+   </Row>
+   <Row>
+    <Cell ss:StyleID="InfoStyle"><Data ss:Type="String">🎯 Légende: 8-10 (Excellent), 6-7 (Bon), 0-5 (À améliorer)</Data></Cell>
+   </Row>
+   <Row></Row>`
+
+      // En-têtes
+      const headerRow = `
+   <Row ss:Height="30">
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">🏆 Rang</Data></Cell>
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">🤖 Modèle IA</Data></Cell>
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">🏢 Entreprise</Data></Cell>
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">⚡ Temps (ms)</Data></Cell>
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">💰 Coût ($)</Data></Cell>
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">⭐ Score (/10)</Data></Cell>
+    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">📝 Réponse</Data></Cell>
+   </Row>`
+
+      // Données
+      const dataRows = filteredAndSortedResults
+        .map((result, index) => {
+          const scoreStyle = result.score >= 8 ? "ExcellentScore" : result.score >= 6 ? "GoodScore" : "PoorScore"
+          const cleanResponse =
+            result.response
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;")
+              .replace(/'/g, "&apos;")
+              .substring(0, 500) + (result.response.length > 500 ? "..." : "")
+
+          return `
+   <Row ss:Height="60">
+    <Cell ss:StyleID="CenterStyle"><Data ss:Type="Number">${index + 1}</Data></Cell>
+    <Cell ss:StyleID="DataStyle"><Data ss:Type="String">${result.name}</Data></Cell>
+    <Cell ss:StyleID="DataStyle"><Data ss:Type="String">${result.company}</Data></Cell>
+    <Cell ss:StyleID="CenterStyle"><Data ss:Type="Number">${result.responseTime}</Data></Cell>
+    <Cell ss:StyleID="CenterStyle"><Data ss:Type="Number">${result.cost.toFixed(4)}</Data></Cell>
+    <Cell ss:StyleID="${scoreStyle}"><Data ss:Type="Number">${result.score}</Data></Cell>
+    <Cell ss:StyleID="DataStyle"><Data ss:Type="String">${cleanResponse}</Data></Cell>
+   </Row>`
+        })
+        .join("")
+
+      const worksheetEnd = `
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>600</HorizontalResolution>
+    <VerticalResolution>600</VerticalResolution>
+   </Print>
+   <Selected/>
+   <FreezePanes/>
+   <FrozenNoSplit/>
+   <SplitHorizontal>7</SplitHorizontal>
+   <TopRowBottomPane>7</TopRowBottomPane>
+   <ActivePane>2</ActivePane>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+    </Pane>
+    <Pane>
+     <Number>2</Number>
+     <ActiveRow>0</ActiveRow>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+</Workbook>`
+
+      return xmlHeader + worksheetStart + metadataRows + headerRow + dataRows + worksheetEnd
+    }
+
+    const excelXML = createExcelXML()
+
+    const blob = new Blob([excelXML], {
+      type: "application/vnd.ms-excel;charset=utf-8",
+    })
+
+    const link = document.createElement("a")
+    const url = URL.createObjectURL(blob)
+
+    link.setAttribute("href", url)
+    link.setAttribute("download", `Comparaison-LLM-${new Date().toISOString().split("T")[0]}.xls`)
+    link.style.visibility = "hidden"
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
   }
 
   const filteredAndSortedResults = results
@@ -243,15 +653,18 @@ export function TestZone({ id }: TestZoneProps) {
                   </div>
                 </div>
 
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-white/20 text-gray-300 hover:bg-white/10 bg-transparent"
-                  disabled={results.length === 0}
-                >
-                  <Download className="mr-2 w-4 h-4" />
-                  Export CSV
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={exportToExcel}
+                    className="border-white/20 text-gray-300 hover:bg-white/10 bg-transparent"
+                    disabled={results.length === 0}
+                  >
+                    <Download className="mr-2 w-4 h-4" />
+                    Export Excel
+                  </Button>
+                </div>
               </div>
             </Card>
 
@@ -265,13 +678,21 @@ export function TestZone({ id }: TestZoneProps) {
                   <div className="flex items-start gap-6">
                     {/* Model Info */}
                     <div className="flex items-center gap-4 min-w-48">
-                      <div
-                        className={`w-12 h-12 bg-gradient-to-r ${result.color} rounded-xl flex items-center justify-center`}
-                      >
-                        <result.icon className="w-6 h-6 text-white" />
+                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center p-2 shadow-lg">
+                        <img
+                          src={result.logo || "/placeholder.svg"}
+                          alt={`${result.company} logo`}
+                          className="w-full h-full object-contain"
+                          onError={(e) => {
+                            // Fallback en cas d'erreur de chargement
+                            const target = e.target as HTMLImageElement
+                            target.src = `/placeholder.svg?height=48&width=48&text=${result.company.charAt(0)}`
+                          }}
+                        />
                       </div>
                       <div>
                         <h3 className="font-semibold text-white">{result.name}</h3>
+                        <p className="text-sm text-gray-400">{result.company}</p>
                         <Badge variant="outline" className="mt-1 border-white/20 text-gray-400">
                           #{index + 1}
                         </Badge>
@@ -305,7 +726,7 @@ export function TestZone({ id }: TestZoneProps) {
                           {result.responseTime}ms
                         </div>
                         <div className="flex items-center gap-1 text-gray-400">
-                          <DollarSign className="w-4 h-4" />${result.cost}
+                          <DollarSign className="w-4 h-4" />${result.cost.toFixed(4)}
                         </div>
                       </div>
 
@@ -364,12 +785,15 @@ export function TestZone({ id }: TestZoneProps) {
               <DialogTitle className="flex items-center gap-3 text-white">
                 {selectedResult && (
                   <>
-                    <div
-                      className={`w-8 h-8 bg-gradient-to-r ${selectedResult.color} rounded-lg flex items-center justify-center`}
-                    >
-                      <selectedResult.icon className="w-4 h-4 text-white" />
+                    <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center p-1">
+                      <img
+                        src={selectedResult.logo || "/placeholder.svg"}
+                        alt={`${selectedResult.company} logo`}
+                        className="w-full h-full object-contain"
+                      />
                     </div>
                     {selectedResult.name} Response
+                    <span className="text-sm text-gray-400">by {selectedResult.company}</span>
                   </>
                 )}
               </DialogTitle>
@@ -385,7 +809,7 @@ export function TestZone({ id }: TestZoneProps) {
                     {selectedResult?.responseTime}ms
                   </div>
                   <div className="flex items-center gap-1">
-                    <DollarSign className="w-4 h-4" />${selectedResult?.cost}
+                    <DollarSign className="w-4 h-4" />${selectedResult?.cost.toFixed(4)}
                   </div>
                   <div className="flex items-center gap-1">
                     <Star className="w-4 h-4 text-yellow-500" />

@@ -11,23 +11,13 @@ export function Footer() {
             </div>
             <span className="text-white font-semibold text-lg">LLM Comparator</span>
           </div>
-
-          <div className="flex items-center gap-6">
-            <a
-              href="https://github.com/llm-comparator"
-              className="text-gray-400 hover:text-white transition-colors flex items-center gap-2"
-            >
-              <Github className="w-5 h-5" />
-              <span>GitHub</span>
-            </a>
-          </div>
         </div>
 
         <div className="mt-8 pt-8 border-t border-white/10 text-center">
           <p className="text-gray-400 flex items-center justify-center gap-2">
             Made with <Heart className="w-4 h-4 text-red-500" /> for the AI community
           </p>
-          <p className="text-gray-500 text-sm mt-2">© 2024 LLM Comparator. Open source et gratuit pour toujours.</p>
+          <p className="text-gray-500 text-sm mt-2">© 2025 LLM Comparator. Free Beta.</p>
         </div>
       </div>
     </footer>
