@@ -11,7 +11,7 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
 interface StripeCheckoutButtonProps {
   priceId: string
   planType: string
-  billingPeriod: "monthly" | "yearly"
+  billingPeriod: string
   children: React.ReactNode
   className?: string
 }
@@ -29,6 +29,8 @@ export function StripeCheckoutButton({
     try {
       setIsLoading(true)
 
+      console.log("Starting checkout process:", { priceId, planType, billingPeriod })
+
       // Créer la session de checkout
       const response = await fetch("/api/create-checkout-session", {
         method: "POST",
@@ -42,11 +44,13 @@ export function StripeCheckoutButton({
         }),
       })
 
-      const data = await response.json()
-
-      if (data.error) {
-        throw new Error(data.error)
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to create checkout session")
       }
+
+      const { sessionId } = await response.json()
+      console.log("Checkout session created:", sessionId)
 
       // Rediriger vers Stripe Checkout
       const stripe = await stripePromise
@@ -55,23 +59,31 @@ export function StripeCheckoutButton({
       }
 
       const { error } = await stripe.redirectToCheckout({
-        sessionId: data.sessionId,
+        sessionId,
       })
 
       if (error) {
+        console.error("Stripe redirect error:", error)
         throw error
       }
     } catch (error) {
       console.error("Error during checkout:", error)
-      alert("Something went wrong. Please try again.")
+      // Vous pouvez ajouter une notification d'erreur ici
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <Button onClick={handleCheckout} disabled={isLoading} className={className}>
-      {isLoading ? "Loading..." : children}
+    <Button onClick={handleCheckout} disabled={isLoading} className={className} size="lg">
+      {isLoading ? (
+        <div className="flex items-center">
+          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+          Processing...
+        </div>
+      ) : (
+        children
+      )}
     </Button>
   )
 }

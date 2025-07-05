@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { createClient } from "@supabase/supabase-js"
 import Stripe from "stripe"
-import { supabaseAdmin } from "@/lib/supabase"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",
@@ -8,10 +8,16 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
 
+// Client admin pour les webhooks (server-side only)
+const supabaseAdmin = createClient("https://jbgvpcimlmrkzjqyjucc.supabase.co", process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+  },
+})
+
 export async function POST(request: NextRequest) {
   try {
-    console.log("=== STRIPE WEBHOOK ===")
-
     const body = await request.text()
     const signature = request.headers.get("stripe-signature")!
 
@@ -24,7 +30,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid signature" }, { status: 400 })
     }
 
-    console.log("✅ Webhook event received:", event.type)
+    console.log("🔔 Webhook event received:", event.type, "ID:", event.id)
 
     switch (event.type) {
       case "checkout.session.completed":
@@ -48,7 +54,7 @@ export async function POST(request: NextRequest) {
         break
 
       default:
-        console.log(`ℹ️ Unhandled event type: ${event.type}`)
+        console.log(`⚠️ Unhandled event type: ${event.type}`)
     }
 
     return NextResponse.json({ received: true })
@@ -63,95 +69,124 @@ export async function POST(request: NextRequest) {
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   try {
-    console.log("🎉 Processing checkout completion:", session.id)
+    console.log("💳 Processing checkout completion:", session.id)
+    console.log("Session data:", {
+      customer: session.customer,
+      subscription: session.subscription,
+      metadata: session.metadata,
+      customer_details: session.customer_details,
+    })
 
     const userId = session.metadata?.user_id
-    const planType = session.metadata?.plan_type
-    const billingPeriod = session.metadata?.billing_period
-
-    if (!planType) {
-      console.error("❌ Missing plan_type in session metadata")
-      return
-    }
-
-    // Calculer les crédits selon le plan
-    const credits = planType === "pro" ? 1000 : planType === "business" ? 5000 : 50
+    const planType = session.metadata?.plan_type || "pro"
+    const billingPeriod = session.metadata?.billing_period || "monthly"
 
     if (userId) {
       // CAS 1: UTILISATEUR AUTHENTIFIÉ
-      console.log("✅ Processing for authenticated user:", userId)
+      console.log("✅ Processing authenticated user checkout for user:", userId)
 
       // Mettre à jour le plan de l'utilisateur
-      const { error: updateError } = await supabaseAdmin
+      const credits = planType === "pro" ? 1000 : planType === "business" ? 5000 : 50
+      console.log("Updating user plan to:", planType, "with credits:", credits)
+
+      const { data: userUpdateData, error: userUpdateError } = await supabaseAdmin
         .from("users")
         .update({
           plan: planType,
           credits: credits,
         })
         .eq("id", userId)
+        .select()
 
-      if (updateError) {
-        console.error("❌ Error updating user plan:", updateError)
+      if (userUpdateError) {
+        console.error("❌ Error updating user plan:", userUpdateError)
       } else {
-        console.log("✅ User plan updated successfully")
+        console.log("✅ User plan updated successfully:", userUpdateData)
       }
 
       // Sauvegarder ou mettre à jour la relation customer
       if (session.customer) {
-        const { error: customerError } = await supabaseAdmin.from("stripe_customers").upsert({
-          user_id: userId,
-          stripe_customer_id: session.customer as string,
-        })
+        console.log("Saving customer relation:", userId, "->", session.customer)
+
+        const { data: customerData, error: customerError } = await supabaseAdmin
+          .from("stripe_customers")
+          .upsert({
+            user_id: userId,
+            stripe_customer_id: session.customer as string,
+          })
+          .select()
 
         if (customerError) {
           console.error("❌ Error saving customer relation:", customerError)
         } else {
-          console.log("✅ Customer relation saved")
+          console.log("✅ Customer relation saved:", customerData)
         }
       }
 
       // Sauvegarder l'abonnement si présent
       if (session.subscription) {
-        const subscription = await stripe.subscriptions.retrieve(session.subscription as string)
+        console.log("Retrieving subscription details:", session.subscription)
 
-        const { error: subscriptionError } = await supabaseAdmin.from("subscriptions").upsert({
-          user_id: userId,
-          stripe_subscription_id: subscription.id,
-          stripe_customer_id: session.customer as string,
+        const subscription = await stripe.subscriptions.retrieve(session.subscription as string)
+        console.log("Subscription details:", {
+          id: subscription.id,
           status: subscription.status,
-          price_id: subscription.items.data[0]?.price.id,
-          current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-          current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-          cancel_at_period_end: subscription.cancel_at_period_end,
+          customer: subscription.customer,
+          current_period_start: subscription.current_period_start,
+          current_period_end: subscription.current_period_end,
         })
+
+        const { data: subscriptionData, error: subscriptionError } = await supabaseAdmin
+          .from("subscriptions")
+          .upsert({
+            user_id: userId,
+            stripe_subscription_id: subscription.id,
+            stripe_customer_id: session.customer as string,
+            status: subscription.status,
+            price_id: subscription.items.data[0]?.price.id,
+            current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
+            current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+            cancel_at_period_end: subscription.cancel_at_period_end,
+          })
+          .select()
 
         if (subscriptionError) {
           console.error("❌ Error saving subscription:", subscriptionError)
         } else {
-          console.log("✅ Subscription saved successfully")
+          console.log("✅ Subscription saved successfully:", subscriptionData)
         }
       }
     } else {
       // CAS 2: PROSPECT NON AUTHENTIFIÉ
-      console.log("🔓 Processing for guest user")
+      console.log("🔓 Processing guest checkout - storing in pending_subscriptions")
 
-      const customerEmail = session.customer_details?.email || session.customer_email
+      const customerDetails = session.customer_details
+      console.log("Customer details:", customerDetails)
 
-      const { error: pendingError } = await supabaseAdmin.from("pending_subscriptions").insert({
+      const pendingData = {
         stripe_customer_id: session.customer as string,
-        email: customerEmail,
+        email: customerDetails?.email || "",
+        name: customerDetails?.name || "",
         plan: planType,
         session_id: session.id,
-      })
+      }
+
+      console.log("Inserting pending subscription:", pendingData)
+
+      const { data: pendingResult, error: pendingError } = await supabaseAdmin
+        .from("pending_subscriptions")
+        .insert(pendingData)
+        .select()
 
       if (pendingError) {
         console.error("❌ Error saving pending subscription:", pendingError)
       } else {
-        console.log("✅ Pending subscription saved for guest")
+        console.log("✅ Pending subscription saved:", pendingResult)
       }
     }
   } catch (error) {
     console.error("❌ Error in handleCheckoutCompleted:", error)
+    throw error
   }
 }
 
@@ -159,7 +194,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   try {
     console.log("🔄 Processing subscription update:", subscription.id)
 
-    const { error } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from("subscriptions")
       .update({
         status: subscription.status,
@@ -168,11 +203,12 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
         cancel_at_period_end: subscription.cancel_at_period_end,
       })
       .eq("stripe_subscription_id", subscription.id)
+      .select()
 
     if (error) {
       console.error("❌ Error updating subscription:", error)
     } else {
-      console.log("✅ Subscription updated successfully")
+      console.log("✅ Subscription updated successfully:", data)
     }
   } catch (error) {
     console.error("❌ Error in handleSubscriptionUpdated:", error)
@@ -181,18 +217,21 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   try {
-    console.log("❌ Processing subscription cancellation:", subscription.id)
+    console.log("❌ Processing subscription deletion:", subscription.id)
 
     // Mettre à jour le statut de l'abonnement
-    const { error: subscriptionError } = await supabaseAdmin
+    const { data: subscriptionUpdateData, error: subscriptionError } = await supabaseAdmin
       .from("subscriptions")
       .update({
-        status: "cancelled",
+        status: "canceled",
       })
       .eq("stripe_subscription_id", subscription.id)
+      .select()
 
     if (subscriptionError) {
-      console.error("❌ Error updating cancelled subscription:", subscriptionError)
+      console.error("❌ Error updating subscription status:", subscriptionError)
+    } else {
+      console.log("✅ Subscription status updated:", subscriptionUpdateData)
     }
 
     // Remettre l'utilisateur au plan gratuit
@@ -203,18 +242,19 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
       .single()
 
     if (subscriptionData?.user_id) {
-      const { error: userError } = await supabaseAdmin
+      const { data: userUpdateData, error: userError } = await supabaseAdmin
         .from("users")
         .update({
           plan: "free",
           credits: 50,
         })
         .eq("id", subscriptionData.user_id)
+        .select()
 
       if (userError) {
-        console.error("❌ Error downgrading user to free plan:", userError)
+        console.error("❌ Error updating user to free plan:", userError)
       } else {
-        console.log("✅ User downgraded to free plan")
+        console.log("✅ User downgraded to free plan:", userUpdateData)
       }
     }
   } catch (error) {
@@ -226,21 +266,21 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   try {
     console.log("💰 Processing successful payment:", invoice.id)
 
-    if (invoice.customer && invoice.subscription) {
-      // Enregistrer le paiement
-      const { error } = await supabaseAdmin.from("payments").insert({
-        stripe_payment_intent_id: invoice.payment_intent as string,
-        amount: invoice.amount_paid,
-        currency: invoice.currency,
-        status: "succeeded",
-        description: invoice.description || `Payment for ${invoice.lines.data[0]?.description}`,
-      })
+    const paymentData = {
+      user_id: invoice.metadata?.user_id,
+      stripe_payment_intent_id: invoice.payment_intent as string,
+      amount: invoice.amount_paid,
+      currency: invoice.currency,
+      status: "succeeded",
+      description: invoice.description || `Payment for ${invoice.lines.data[0]?.description}`,
+    }
 
-      if (error) {
-        console.error("❌ Error saving payment record:", error)
-      } else {
-        console.log("✅ Payment record saved")
-      }
+    const { data, error } = await supabaseAdmin.from("payments").insert(paymentData).select()
+
+    if (error) {
+      console.error("❌ Error saving payment record:", error)
+    } else {
+      console.log("✅ Payment record saved:", data)
     }
   } catch (error) {
     console.error("❌ Error in handlePaymentSucceeded:", error)
@@ -251,19 +291,21 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
   try {
     console.log("💸 Processing failed payment:", invoice.id)
 
-    // Enregistrer le paiement échoué
-    const { error } = await supabaseAdmin.from("payments").insert({
+    const paymentData = {
+      user_id: invoice.metadata?.user_id,
       stripe_payment_intent_id: invoice.payment_intent as string,
       amount: invoice.amount_due,
       currency: invoice.currency,
       status: "failed",
-      description: `Failed payment for ${invoice.lines.data[0]?.description}`,
-    })
+      description: invoice.description || `Failed payment for ${invoice.lines.data[0]?.description}`,
+    }
+
+    const { data, error } = await supabaseAdmin.from("payments").insert(paymentData).select()
 
     if (error) {
       console.error("❌ Error saving failed payment record:", error)
     } else {
-      console.log("✅ Failed payment record saved")
+      console.log("✅ Failed payment record saved:", data)
     }
   } catch (error) {
     console.error("❌ Error in handlePaymentFailed:", error)
