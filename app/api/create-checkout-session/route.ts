@@ -1,7 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import Stripe from "stripe"
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+import { supabase } from "@/lib/supabase"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",
@@ -19,7 +18,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Vérifier si l'utilisateur est authentifié
-    const supabase = createRouteHandlerClient({ cookies })
     const {
       data: { user },
       error: authError,
@@ -43,9 +41,9 @@ export async function POST(request: NextRequest) {
 
       // Vérifier s'il a déjà un customer Stripe dans la table stripe_customers
       const { data: existingCustomer } = await supabase
-        .from("stripe_customers") // ✅ Utilise stripe_customers
+        .from("stripe_customers")
         .select("stripe_customer_id")
-        .eq("user_id", user.id) // ✅ Utilise user_id
+        .eq("user_id", user.id)
         .single()
 
       if (existingCustomer) {

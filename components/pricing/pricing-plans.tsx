@@ -263,7 +263,6 @@ export function PricingPlans() {
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
                 <p className="text-gray-400 text-sm mb-4">{plan.description}</p>
-
                 <div className="mb-6">
                   <div className="flex items-baseline justify-center gap-1">
                     <span className="text-4xl font-bold text-white">{formatPrice(plan)}</span>
@@ -275,7 +274,6 @@ export function PricingPlans() {
                     <div className="text-green-400 text-sm mt-1">Save ${yearlySavings}/year</div>
                   )}
                 </div>
-
                 {/* Key Metrics */}
                 <div className="space-y-2 mb-6 p-4 bg-white/5 rounded-lg">
                   <div className="text-sm text-gray-300">

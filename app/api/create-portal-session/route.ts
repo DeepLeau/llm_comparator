@@ -1,7 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import Stripe from "stripe"
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+import { supabase } from "@/lib/supabase"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",
@@ -9,40 +8,51 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies })
+    console.log("=== CREATE PORTAL SESSION ===")
 
-    // Vérifier que l'utilisateur est authentifié
+    // Vérifier si l'utilisateur est authentifié
     const {
       data: { user },
       error: authError,
     } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      console.log("❌ User not authenticated:", authError)
+      return NextResponse.json({ error: "User not authenticated" }, { status: 401 })
     }
 
-    // Récupérer le customer ID Stripe de l'utilisateur depuis la table stripe_customers
+    console.log("✅ User authenticated:", user.email)
+
+    // Récupérer le customer ID Stripe de l'utilisateur
     const { data: customerData, error: customerError } = await supabase
-      .from("stripe_customers") // ✅ Utilise stripe_customers, pas profiles
+      .from("stripe_customers")
       .select("stripe_customer_id")
-      .eq("user_id", user.id) // ✅ Utilise user_id, pas id
+      .eq("user_id", user.id)
       .single()
 
     if (customerError || !customerData) {
+      console.log("❌ No Stripe customer found for user:", user.id)
       return NextResponse.json({ error: "No subscription found" }, { status: 404 })
     }
 
-    // Créer une session du portail client
+    console.log("✅ Found Stripe customer:", customerData.stripe_customer_id)
+
+    // Créer une session du portail client Stripe
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: customerData.stripe_customer_id,
       return_url: `${request.nextUrl.origin}/settings`,
     })
 
+    console.log("✅ Portal session created:", portalSession.id)
+
     return NextResponse.json({ url: portalSession.url })
   } catch (error) {
-    console.error("Error creating portal session:", error)
+    console.error("❌ Error creating portal session:", error)
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Internal server error" },
+      {
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 },
     )
   }
