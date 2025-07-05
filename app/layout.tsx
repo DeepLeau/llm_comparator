@@ -2,6 +2,8 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
+import { ThemeProvider } from "@/components/theme-provider"
+import { WorkflowProvider } from "@/contexts/workflow-context"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -18,12 +20,16 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="fr" className="dark">
+    <html lang="en" suppressHydrationWarning>
       <head>
         {/* Script Umami Analytics */}
         <script defer src="https://cloud.umami.is/script.js" data-website-id="13b0cce7-2ec9-49f6-91d4-eafd5bf65588"></script>
       </head>
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+          <WorkflowProvider>{children}</WorkflowProvider>
+        </ThemeProvider>
+      </body>
     </html>
   )
 }

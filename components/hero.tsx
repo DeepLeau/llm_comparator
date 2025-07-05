@@ -1,8 +1,9 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Sparkles } from "lucide-react"
+import { ArrowRight, Sparkles, LogIn } from "lucide-react"
 import { useEffect, useState } from "react"
+import Link from "next/link"
 
 interface HeroProps {
   onTryNow: () => void
@@ -32,7 +33,7 @@ export function Hero({ onTryNow }: HeroProps) {
           className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm mb-8 transition-all duration-1000 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
         >
           <Sparkles className="w-4 h-4 text-purple-400" />
-          <span className="text-sm text-gray-300">Free Tool • No Sign-Up Required</span>
+          <span className="text-sm text-gray-300">Free & Open Source</span>
         </div>
 
         {/* Main heading */}
@@ -54,18 +55,30 @@ export function Hero({ onTryNow }: HeroProps) {
           comparisons, scoring, and recommendations.
         </p>
 
-        {/* CTA button */}
+        {/* CTA buttons */}
         <div
-          className={`transition-all duration-1000 delay-600 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+          className={`flex flex-col sm:flex-row gap-4 justify-center items-center transition-all duration-1000 delay-600 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
         >
-          <Button
-            size="lg"
-            onClick={onTryNow}
-            className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-2xl shadow-purple-500/25 transition-all duration-300 hover:scale-105"
-          >
-            Try it now
-            <ArrowRight className="ml-2 w-5 h-5" />
-          </Button>
+          <Link href="/pricing">
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-2xl shadow-purple-500/25 transition-all duration-300 hover:scale-105"
+            >
+              Try it now
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+          </Link>
+
+          <Link href="/login">
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-white/20 bg-white/5 hover:bg-white/10 text-white px-8 py-4 text-lg font-semibold rounded-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-white/30"
+            >
+              <LogIn className="mr-2 w-5 h-5" />
+              Sign In
+            </Button>
+          </Link>
         </div>
 
         {/* Stats */}

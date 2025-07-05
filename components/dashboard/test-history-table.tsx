@@ -1,144 +1,341 @@
 "use client"
 
-import { Card } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Eye, Clock, DollarSign, Star } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Eye,
+  DollarSign,
+  Calendar,
+  Hash,
+  Target,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react"
 import { format } from "date-fns"
-import { fr } from "date-fns/locale"
 import type { TestRun } from "@/app/dashboard/page"
 
 interface TestHistoryTableProps {
   testRuns: TestRun[]
+  totalCount: number
+  currentPage: number
+  itemsPerPage: number
+  onPageChange: (page: number) => void
+  onItemsPerPageChange: (items: number) => void
+  loading: boolean
 }
 
-export function TestHistoryTable({ testRuns }: TestHistoryTableProps) {
-  const truncatePrompt = (prompt: string, maxLength = 100) => {
-    if (prompt.length <= maxLength) return prompt
-    return prompt.substring(0, maxLength) + "..."
-  }
+export function TestHistoryTable({
+  testRuns,
+  totalCount,
+  currentPage,
+  itemsPerPage,
+  onPageChange,
+  onItemsPerPageChange,
+  loading,
+}: TestHistoryTableProps) {
+  const totalPages = Math.ceil(totalCount / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = Math.min(startIndex + itemsPerPage, totalCount)
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("fr-FR", {
+    return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "EUR",
+      currency: "USD",
       minimumFractionDigits: 2,
       maximumFractionDigits: 3,
     }).format(amount)
   }
 
-  if (testRuns.length === 0) {
+  const getUseCaseBadgeColor = (useCase: string) => {
+    const colors: Record<string, string> = {
+      "Content Generation": "bg-blue-600/20 text-blue-300 border-blue-600/30",
+      "Code Assistance": "bg-green-600/20 text-green-300 border-green-600/30",
+      "Customer Support": "bg-purple-600/20 text-purple-300 border-purple-600/30",
+      "Data Analysis": "bg-orange-600/20 text-orange-300 border-orange-600/30",
+      Translation: "bg-pink-600/20 text-pink-300 border-pink-600/30",
+      "Research and Summarization": "bg-yellow-600/20 text-yellow-300 border-yellow-600/30",
+    }
+    return colors[useCase] || "bg-gray-600/20 text-gray-300 border-gray-600/30"
+  }
+
+  const handleViewDetails = (testId: string) => {
+    window.location.href = `/results?testId=${testId}`
+  }
+
+  const generatePageNumbers = () => {
+    const pages = []
+    const maxVisiblePages = 5
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i)
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          pages.push(i)
+        }
+        pages.push("...")
+        pages.push(totalPages)
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1)
+        pages.push("...")
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i)
+        }
+      } else {
+        pages.push(1)
+        pages.push("...")
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pages.push(i)
+        }
+        pages.push("...")
+        pages.push(totalPages)
+      }
+    }
+
+    return pages
+  }
+
+  if (totalCount === 0) {
     return (
-      <Card className="p-12 bg-white/5 border-white/10 backdrop-blur-sm text-center">
-        <div className="text-gray-400">
-          <div className="text-4xl mb-4">📊</div>
-          <h3 className="text-lg font-medium text-white mb-2">Aucun test trouvé</h3>
-          <p>Aucun test ne correspond à vos critères de filtrage.</p>
-        </div>
+      <Card className="bg-gray-900/50 border-gray-800">
+        <CardContent className="p-12 text-center">
+          <div className="text-gray-400">
+            <div className="text-4xl mb-4">📊</div>
+            <h3 className="text-lg font-medium text-white mb-2">No tests found</h3>
+            <p>You haven't run any tests yet. Start your first comparison to see results here.</p>
+            <Button
+              className="mt-4 bg-blue-600 hover:bg-blue-700 text-white"
+              onClick={() => (window.location.href = "/compare")}
+            >
+              Start Your First Test
+            </Button>
+          </div>
+        </CardContent>
       </Card>
     )
   }
 
   return (
-    <Card className="bg-white/5 border-white/10 backdrop-blur-sm overflow-hidden">
-      <div className="p-6 border-b border-white/10">
-        <h2 className="text-xl font-semibold text-white">Historique des tests</h2>
-        <p className="text-gray-400 text-sm mt-1">
-          {testRuns.length} test{testRuns.length > 1 ? "s" : ""} trouvé{testRuns.length > 1 ? "s" : ""}
-        </p>
+    <div className="space-y-6">
+      {/* Results Overview */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-white">Test History</h2>
+          <p className="text-gray-400 text-sm mt-1">
+            Showing {startIndex + 1} to {endIndex} of {totalCount} tests
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary" className="bg-blue-600/20 text-blue-300 border-blue-600/30">
+            {totalCount} Total Tests
+          </Badge>
+          <Badge variant="secondary" className="bg-green-600/20 text-green-300 border-green-600/30">
+            Total Cost: {formatCurrency(testRuns.reduce((sum, test) => sum + test.total_cost, 0))}
+          </Badge>
+        </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow className="border-white/10 hover:bg-white/5">
-              <TableHead className="text-gray-300 font-medium">Date du test</TableHead>
-              <TableHead className="text-gray-300 font-medium">Prompt utilisé</TableHead>
-              <TableHead className="text-gray-300 font-medium">Meilleur modèle</TableHead>
-              <TableHead className="text-gray-300 font-medium text-center">Score moyen</TableHead>
-              <TableHead className="text-gray-300 font-medium text-center">Temps moyen</TableHead>
-              <TableHead className="text-gray-300 font-medium text-center">Coût total</TableHead>
-              <TableHead className="text-gray-300 font-medium text-center">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {testRuns.map((testRun) => (
-              <TableRow key={testRun.id} className="border-white/10 hover:bg-white/5 transition-colors">
-                <TableCell className="text-gray-300">
-                  {format(new Date(testRun.date), "dd MMM yyyy", { locale: fr })}
-                </TableCell>
-
-                <TableCell className="max-w-xs">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="text-gray-300 cursor-help">{truncatePrompt(testRun.prompt)}</div>
-                      </TooltipTrigger>
-                      <TooltipContent className="max-w-md bg-gray-800 border-white/20 text-white p-3">
-                        <p className="text-sm leading-relaxed">{testRun.prompt}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </TableCell>
-
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`w-8 h-8 bg-gradient-to-r ${testRun.bestModel.color} rounded-lg flex items-center justify-center text-sm`}
-                    >
-                      {testRun.bestModel.icon}
+      {/* Table */}
+      <Card className="bg-gray-900/50 border-gray-800 overflow-hidden">
+        {loading ? (
+          <CardContent className="p-8 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-400">Loading tests...</p>
+          </CardContent>
+        ) : (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="border-gray-800 hover:bg-gray-800/50">
+                  <TableHead className="text-gray-300 font-medium">
+                    <div className="flex items-center gap-2">
+                      <Hash className="w-4 h-4" />
+                      Test ID
                     </div>
-                    <div>
-                      <div className="text-white font-medium">{testRun.bestModel.name}</div>
-                      <div className="flex items-center gap-1 text-xs text-gray-400">
-                        <Star className="w-3 h-3 text-yellow-500" />
-                        {testRun.bestModel.score}/10
+                  </TableHead>
+                  <TableHead className="text-gray-300 font-medium">
+                    <div className="flex items-center gap-2">
+                      <Target className="w-4 h-4" />
+                      Use Case
+                    </div>
+                  </TableHead>
+                  <TableHead className="text-gray-300 font-medium">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
+                      Date
+                    </div>
+                  </TableHead>
+                  <TableHead className="text-gray-300 font-medium">
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="w-4 h-4" />
+                      Cost
+                    </div>
+                  </TableHead>
+                  <TableHead className="text-gray-300 font-medium text-center">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {testRuns.map((testRun) => (
+                  <TableRow key={testRun.id} className="border-gray-800 hover:bg-gray-800/50 transition-colors">
+                    <TableCell className="font-mono text-sm text-blue-400">
+                      TEST-{testRun.id.slice(-8).toUpperCase()}
+                    </TableCell>
+
+                    <TableCell>
+                      <Badge variant="secondary" className={getUseCaseBadgeColor(testRun.use_case)}>
+                        {testRun.use_case}
+                      </Badge>
+                    </TableCell>
+
+                    <TableCell className="text-gray-300">
+                      {format(new Date(testRun.created_at), "MMM dd, yyyy")}
+                    </TableCell>
+
+                    <TableCell>
+                      <div className="flex items-center gap-1 text-white font-medium">
+                        <DollarSign className="w-4 h-4 text-green-500" />
+                        {formatCurrency(testRun.total_cost)}
                       </div>
+                    </TableCell>
+
+                    <TableCell className="text-center">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleViewDetails(testRun.id)}
+                        className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white bg-transparent"
+                      >
+                        <Eye className="w-4 h-4 mr-1" />
+                        View Details
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </Card>
+
+      {/* Enhanced Pagination */}
+      {totalPages > 1 && (
+        <Card className="bg-gray-900/50 border-gray-800">
+          <CardContent className="p-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              {/* Items per page selector */}
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-gray-400">Show:</span>
+                <Select
+                  value={itemsPerPage.toString()}
+                  onValueChange={(value) => onItemsPerPageChange(Number.parseInt(value))}
+                >
+                  <SelectTrigger className="w-20 bg-gray-800 border-gray-700 text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-700">
+                    <SelectItem value="10" className="text-white hover:bg-gray-700">
+                      10
+                    </SelectItem>
+                    <SelectItem value="25" className="text-white hover:bg-gray-700">
+                      25
+                    </SelectItem>
+                    <SelectItem value="50" className="text-white hover:bg-gray-700">
+                      50
+                    </SelectItem>
+                    <SelectItem value="100" className="text-white hover:bg-gray-700">
+                      100
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <span className="text-gray-400">per page</span>
+              </div>
+
+              {/* Page info */}
+              <div className="text-sm text-gray-400">
+                Page {currentPage} of {totalPages}
+              </div>
+
+              {/* Pagination controls */}
+              <div className="flex items-center gap-1">
+                {/* First page */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onPageChange(1)}
+                  disabled={currentPage === 1}
+                  className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white bg-transparent disabled:opacity-50"
+                >
+                  <ChevronsLeft className="w-4 h-4" />
+                </Button>
+
+                {/* Previous page */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onPageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white bg-transparent disabled:opacity-50"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+
+                {/* Page numbers */}
+                <div className="flex items-center gap-1">
+                  {generatePageNumbers().map((page, index) => (
+                    <div key={index}>
+                      {page === "..." ? (
+                        <span className="px-3 py-1 text-gray-500">...</span>
+                      ) : (
+                        <Button
+                          variant={currentPage === page ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => onPageChange(page as number)}
+                          className={
+                            currentPage === page
+                              ? "bg-blue-600 hover:bg-blue-700 text-white"
+                              : "border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white bg-transparent"
+                          }
+                        >
+                          {page}
+                        </Button>
+                      )}
                     </div>
-                  </div>
-                </TableCell>
+                  ))}
+                </div>
 
-                <TableCell className="text-center">
-                  <Badge variant="outline" className="border-white/20 text-gray-300">
-                    {testRun.averageScore.toFixed(1)}/10
-                  </Badge>
-                </TableCell>
+                {/* Next page */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onPageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white bg-transparent disabled:opacity-50"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
 
-                <TableCell className="text-center">
-                  <div className="flex items-center justify-center gap-1 text-gray-300">
-                    <Clock className="w-4 h-4" />
-                    <span className="text-sm">{testRun.averageTime}ms</span>
-                  </div>
-                </TableCell>
-
-                <TableCell className="text-center">
-                  <div className="flex items-center justify-center gap-1 text-gray-300">
-                    <DollarSign className="w-4 h-4" />
-                    <span className="text-sm">{formatCurrency(testRun.totalCost)}</span>
-                  </div>
-                </TableCell>
-
-                <TableCell className="text-center">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="border-white/20 text-gray-300 hover:bg-white/10 hover:text-white bg-transparent"
-                    onClick={() => {
-                      // Navigate to test details page
-                      window.location.href = `/test/${testRun.id}`
-                    }}
-                  >
-                    <Eye className="w-4 h-4 mr-1" />
-                    Voir détails
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    </Card>
+                {/* Last page */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onPageChange(totalPages)}
+                  disabled={currentPage === totalPages}
+                  className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white bg-transparent disabled:opacity-50"
+                >
+                  <ChevronsRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   )
 }
