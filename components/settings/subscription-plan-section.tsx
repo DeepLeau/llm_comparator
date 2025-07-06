@@ -1,19 +1,20 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
+import { Separator } from "@/components/ui/separator"
+import { Crown, Zap, ArrowRight, ExternalLink } from "lucide-react"
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog"
-import { CreditCard, Crown, Zap, AlertTriangle } from "lucide-react"
+import { supabase } from "@/lib/supabase"
 
 interface SubscriptionPlanSectionProps {
   userProfile: {
@@ -24,172 +25,181 @@ interface SubscriptionPlanSectionProps {
 }
 
 export function SubscriptionPlanSection({ userProfile }: SubscriptionPlanSectionProps) {
-  const [showCancelModal, setShowCancelModal] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [showCancelDialog, setShowCancelDialog] = useState(false)
+
+  const handleManageSubscription = async () => {
+    try {
+      setIsLoading(true)
+
+      // Get the current session and access token
+      const { data: sessionData } = await supabase.auth.getSession()
+      const accessToken = sessionData?.session?.access_token
+
+      if (!accessToken) {
+        throw new Error("No access token available")
+      }
+
+      // Use the dedicated manage-subscription endpoint for paid users
+      const response = await fetch("/api/manage-subscription", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+
+      const data = await response.json()
+
+      if (data.error) {
+        throw new Error(data.error)
+      }
+
+      // Redirect to Stripe customer portal
+      window.location.href = data.url
+    } catch (error) {
+      console.error("Error opening subscription management:", error)
+      alert("Unable to open subscription management. Please try again.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleUpgrade = () => {
+    // For free users, redirect to pricing page
+    window.location.href = "/pricing"
+  }
 
   const currentPlan = userProfile?.plan || "free"
-  const creditsUsed = Math.max(0, (userProfile?.credits || 100) - (userProfile?.credits || 100))
-  const creditsTotal = userProfile?.credits || 100
-  const creditsRemaining = userProfile?.credits || 100
-  const usagePercentage = creditsTotal > 0 ? Math.max(0, ((creditsTotal - creditsRemaining) / creditsTotal) * 100) : 0
-
-  const getPlanIcon = (plan: string) => {
-    switch (plan.toLowerCase()) {
-      case "free":
-        return <Zap className="w-5 h-5" />
-      case "pro":
-        return <Crown className="w-5 h-5" />
-      case "business":
-        return <CreditCard className="w-5 h-5" />
-      default:
-        return <Zap className="w-5 h-5" />
-    }
-  }
-
-  const getPlanColor = (plan: string) => {
-    switch (plan.toLowerCase()) {
-      case "free":
-        return "bg-gray-100 text-gray-800"
-      case "pro":
-        return "bg-blue-100 text-blue-800"
-      case "business":
-        return "bg-purple-100 text-purple-800"
-      default:
-        return "bg-gray-100 text-gray-800"
-    }
-  }
-
-  const getPlanLimits = (plan: string) => {
-    switch (plan.toLowerCase()) {
-      case "free":
-        return { monthlyCredits: 100, features: ["Basic model comparison", "5 tests per day", "Email support"] }
-      case "pro":
-        return {
-          monthlyCredits: 1000,
-          features: ["All models access", "Unlimited tests", "Priority support", "Advanced analytics"],
-        }
-      case "business":
-        return {
-          monthlyCredits: 5000,
-          features: ["Everything in Pro", "Team collaboration", "Custom integrations", "Dedicated support"],
-        }
-      default:
-        return { monthlyCredits: 100, features: ["Basic features"] }
-    }
-  }
-
-  const planLimits = getPlanLimits(currentPlan)
-
-  const handleCancelSubscription = async () => {
-    setIsLoading(true)
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-    setIsLoading(false)
-    setShowCancelModal(false)
-    // Here you would typically redirect or show a success message
-    console.log("Subscription cancelled")
-  }
+  const isFreePlan = currentPlan.toLowerCase() === "free"
 
   return (
-    <>
-      <Card className="bg-gray-900/50 border-gray-800">
-        <CardHeader>
-          <CardTitle className="text-xl font-semibold text-white flex items-center gap-2">
-            {getPlanIcon(currentPlan)}
-            Subscription Plan
-          </CardTitle>
-          <p className="text-gray-400">Manage your subscription and usage</p>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Current Plan */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-300">Current Plan</span>
-              <Badge className={getPlanColor(currentPlan)}>{currentPlan.toUpperCase()}</Badge>
+    <Card className="bg-gray-900/50 border-gray-800">
+      <CardHeader>
+        <CardTitle className="text-white flex items-center">
+          <Crown className="w-5 h-5 mr-2" />
+          Subscription Plan
+        </CardTitle>
+        <CardDescription className="text-gray-400">Manage your current subscription and billing</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Current Plan */}
+        <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg">
+          <div className="flex items-center space-x-3">
+            <div
+              className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                isFreePlan ? "bg-gray-600" : "bg-gradient-to-br from-purple-600 to-blue-600"
+              }`}
+            >
+              {isFreePlan ? <Zap className="w-5 h-5 text-gray-300" /> : <Crown className="w-5 h-5 text-white" />}
             </div>
-
-            {/* Plan Features */}
-            <div className="space-y-2">
-              <span className="text-sm font-medium text-gray-300">Plan Features</span>
-              <ul className="text-sm text-gray-400 space-y-1">
-                {planLimits.features.map((feature, index) => (
-                  <li key={index} className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Usage */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-300">Credits This Month</span>
-                <span className="text-white font-medium">
-                  {creditsRemaining.toLocaleString()}/{planLimits.monthlyCredits.toLocaleString()}
-                </span>
-              </div>
-              <Progress value={(creditsRemaining / planLimits.monthlyCredits) * 100} className="h-2 bg-gray-800" />
-              <p className="text-xs text-gray-400">{creditsRemaining.toLocaleString()} credits remaining</p>
+            <div>
+              <h3 className="text-white font-semibold">{currentPlan.toUpperCase()} Plan</h3>
+              <p className="text-gray-400 text-sm">
+                {isFreePlan ? "Limited features" : `${(userProfile?.credits || 0).toLocaleString()} credits remaining`}
+              </p>
             </div>
           </div>
+          <Badge
+            className={
+              isFreePlan
+                ? "bg-gray-100 text-gray-800"
+                : currentPlan.toLowerCase() === "pro"
+                  ? "bg-blue-100 text-blue-800"
+                  : "bg-purple-100 text-purple-800"
+            }
+          >
+            {currentPlan.toUpperCase()}
+          </Badge>
+        </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3">
+        <Separator className="bg-gray-800" />
+
+        {/* Plan Actions */}
+        <div className="space-y-3">
+          {!isFreePlan ? (
+            <>
+              {/* Manage Subscription */}
+              <Button
+                onClick={handleManageSubscription}
+                disabled={isLoading}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                {isLoading ? "Opening Portal..." : "Manage Subscription"}
+              </Button>
+
+              {/* Cancel Subscription */}
+              <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full border-red-600 text-red-400 hover:bg-red-600/10 bg-transparent"
+                  >
+                    Cancel Subscription
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="bg-gray-900 border-gray-800">
+                  <DialogHeader>
+                    <DialogTitle className="text-white">Cancel Subscription</DialogTitle>
+                    <DialogDescription className="text-gray-400">
+                      You can safely cancel your subscription through Stripe's secure portal. Your subscription will
+                      remain active until the end of your current billing period.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="flex space-x-3 mt-6">
+                    <Button
+                      onClick={() => {
+                        setShowCancelDialog(false)
+                        handleManageSubscription()
+                      }}
+                      className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                    >
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      Open Billing Portal
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowCancelDialog(false)}
+                      className="flex-1 border-gray-600 text-gray-300"
+                    >
+                      Keep Subscription
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </>
+          ) : (
+            /* Upgrade for Free Plan */
             <Button
-              className="bg-blue-600 hover:bg-blue-700 text-white flex-1"
-              onClick={() => (window.location.href = "/pricing")}
+              onClick={handleUpgrade}
+              disabled={isLoading}
+              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
             >
               <Crown className="w-4 h-4 mr-2" />
-              {currentPlan.toLowerCase() === "free" ? "Upgrade Plan" : "Change Plan"}
+              Upgrade Plan
+              <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
+          )}
+        </div>
 
-            {currentPlan.toLowerCase() !== "free" && (
-              <Button
-                variant="outline"
-                className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white bg-transparent flex-1"
-                onClick={() => setShowCancelModal(true)}
-              >
-                Cancel Subscription
-              </Button>
+        {/* Portal Features Info */}
+        <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
+          <p className="text-xs text-blue-300">
+            {isFreePlan ? (
+              <span>
+                <strong>Upgrade:</strong> Choose from our Pro or Business plans to unlock advanced features and higher
+                credit limits.
+              </span>
+            ) : (
+              <span>
+                <strong>Subscription Management:</strong> Securely manage your subscription, update payment methods,
+                view invoices, and change plans through Stripe's customer portal.
+              </span>
             )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Cancel Subscription Modal */}
-      <Dialog open={showCancelModal} onOpenChange={setShowCancelModal}>
-        <DialogContent className="bg-gray-900 border-gray-800 text-white">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-white">
-              <AlertTriangle className="w-5 h-5 text-red-500" />
-              Cancel Subscription
-            </DialogTitle>
-            <DialogDescription className="text-gray-400">
-              Are you sure you want to cancel your {currentPlan.toUpperCase()} subscription? You will lose access to
-              premium features at the end of your billing period.
-            </DialogDescription>
-          </DialogHeader>
-
-          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setShowCancelModal(false)}
-              className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white bg-transparent"
-              disabled={isLoading}
-            >
-              Go back
-            </Button>
-            <Button
-              onClick={handleCancelSubscription}
-              disabled={isLoading}
-              className="bg-red-600 hover:bg-red-700 text-white"
-            >
-              {isLoading ? "Cancelling..." : "Yes, cancel my subscription"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+          </p>
+        </div>
+      </CardContent>
+    </Card>
   )
 }

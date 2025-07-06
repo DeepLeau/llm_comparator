@@ -3,7 +3,6 @@ import { createClient } from "@supabase/supabase-js"
 import Stripe from "stripe"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-06-20",
 })
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
@@ -80,29 +79,14 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     const userId = session.metadata?.user_id
     const planType = session.metadata?.plan_type || "pro"
     const billingPeriod = session.metadata?.billing_period || "monthly"
+    const customerId =
+          typeof session.customer === "string"
+            ? session.customer
+            : (session.customer as Stripe.Customer).id;
 
     if (userId) {
       // CAS 1: UTILISATEUR AUTHENTIFIÉ
       console.log("✅ Processing authenticated user checkout for user:", userId)
-
-      // Mettre à jour le plan de l'utilisateur
-      const credits = planType === "pro" ? 1000 : planType === "business" ? 5000 : 50
-      console.log("Updating user plan to:", planType, "with credits:", credits)
-
-      const { data: userUpdateData, error: userUpdateError } = await supabaseAdmin
-        .from("users")
-        .update({
-          plan: planType,
-          credits: credits,
-        })
-        .eq("id", userId)
-        .select()
-
-      if (userUpdateError) {
-        console.error("❌ Error updating user plan:", userUpdateError)
-      } else {
-        console.log("✅ User plan updated successfully:", userUpdateData)
-      }
 
       // Sauvegarder ou mettre à jour la relation customer
       if (session.customer) {
@@ -112,7 +96,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
           .from("stripe_customers")
           .upsert({
             user_id: userId,
-            stripe_customer_id: session.customer as string,
+            stripe_customer_id: customerId,
           })
           .select()
 
@@ -123,11 +107,13 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         }
       }
 
-      // Sauvegarder l'abonnement si présent
+      // Sauvegarder l'abonnement si présent (le trigger se chargera de mettre à jour users)
       if (session.subscription) {
         console.log("Retrieving subscription details:", session.subscription)
 
-        const subscription = await stripe.subscriptions.retrieve(session.subscription as string)
+        const subscriptionResponse = await stripe.subscriptions.retrieve(session.subscription as string)
+        const subscription = subscriptionResponse as Stripe.Subscription
+
         console.log("Subscription details:", {
           id: subscription.id,
           status: subscription.status,
@@ -141,7 +127,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
           .upsert({
             user_id: userId,
             stripe_subscription_id: subscription.id,
-            stripe_customer_id: session.customer as string,
+            stripe_customer_id: customerId,
             status: subscription.status,
             price_id: subscription.items.data[0]?.price.id,
             current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
@@ -154,6 +140,26 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
           console.error("❌ Error saving subscription:", subscriptionError)
         } else {
           console.log("✅ Subscription saved successfully:", subscriptionData)
+          console.log("🔄 User plan will be updated automatically by trigger")
+        }
+      } else {
+        // Pas d'abonnement, mettre à jour manuellement le plan utilisateur
+        const credits = planType === "pro" ? 1000 : planType === "business" ? 5000 : 50
+        console.log("No subscription, updating user plan manually to:", planType, "with credits:", credits)
+
+        const { data: userUpdateData, error: userUpdateError } = await supabaseAdmin
+          .from("users")
+          .update({
+            plan: planType,
+            credits: credits,
+          })
+          .eq("id", userId)
+          .select()
+
+        if (userUpdateError) {
+          console.error("❌ Error updating user plan:", userUpdateError)
+        } else {
+          console.log("✅ User plan updated successfully:", userUpdateData)
         }
       }
     } else {
@@ -164,7 +170,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       console.log("Customer details:", customerDetails)
 
       const pendingData = {
-        stripe_customer_id: session.customer as string,
+        stripe_customer_id: customerId,
         email: customerDetails?.email || "",
         name: customerDetails?.name || "",
         plan: planType,
@@ -194,32 +200,55 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   try {
     console.log("🔄 Processing subscription update:", subscription.id)
 
-    const { data, error } = await supabaseAdmin
+    const customerId = typeof subscription.customer === "string"
+      ? subscription.customer
+      : (subscription.customer as Stripe.Customer).id;
+
+    // 🔍 On récupère le user_id associé à ce customer
+    const { data: customer, error: customerError } = await supabaseAdmin
+      .from("stripe_customers")
+      .select("user_id")
+      .eq("stripe_customer_id", customerId)
+      .single()
+
+    if (customerError || !customer) {
+      console.error("❌ Unable to find user for subscription update:", customerError)
+      return
+    }
+
+    const userId = customer.user_id;
+
+    const { data: subscriptionData, error: subscriptionError } = await supabaseAdmin
       .from("subscriptions")
-      .update({
+      .upsert({
+        user_id: userId,
+        stripe_subscription_id: subscription.id,
+        stripe_customer_id: customerId,
+        price_id: subscription.items.data[0]?.price.id,
         status: subscription.status,
         current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
         current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
         cancel_at_period_end: subscription.cancel_at_period_end,
-      })
-      .eq("stripe_subscription_id", subscription.id)
+      }, { onConflict: 'stripe_subscription_id' })
       .select()
 
-    if (error) {
-      console.error("❌ Error updating subscription:", error)
+    if (subscriptionError) {
+      console.error("❌ Error updating subscription:", subscriptionError)
     } else {
-      console.log("✅ Subscription updated successfully:", data)
+      console.log("✅ Subscription updated successfully:", subscriptionData)
     }
   } catch (error) {
     console.error("❌ Error in handleSubscriptionUpdated:", error)
   }
 }
 
+
+
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   try {
     console.log("❌ Processing subscription deletion:", subscription.id)
 
-    // Mettre à jour le statut de l'abonnement
+    // Mettre à jour le statut de l'abonnement (le trigger se chargera de mettre à jour users)
     const { data: subscriptionUpdateData, error: subscriptionError } = await supabaseAdmin
       .from("subscriptions")
       .update({
@@ -232,30 +261,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
       console.error("❌ Error updating subscription status:", subscriptionError)
     } else {
       console.log("✅ Subscription status updated:", subscriptionUpdateData)
-    }
-
-    // Remettre l'utilisateur au plan gratuit
-    const { data: subscriptionData } = await supabaseAdmin
-      .from("subscriptions")
-      .select("user_id")
-      .eq("stripe_subscription_id", subscription.id)
-      .single()
-
-    if (subscriptionData?.user_id) {
-      const { data: userUpdateData, error: userError } = await supabaseAdmin
-        .from("users")
-        .update({
-          plan: "free",
-          credits: 50,
-        })
-        .eq("id", subscriptionData.user_id)
-        .select()
-
-      if (userError) {
-        console.error("❌ Error updating user to free plan:", userError)
-      } else {
-        console.log("✅ User downgraded to free plan:", userUpdateData)
-      }
+      console.log("🔄 User will be downgraded to free plan automatically by trigger")
     }
   } catch (error) {
     console.error("❌ Error in handleSubscriptionDeleted:", error)
