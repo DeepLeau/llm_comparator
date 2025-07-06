@@ -19,6 +19,7 @@ function SignUpForm() {
   const searchParams = useSearchParams()
   const selectedPlan = (searchParams.get("plan") as keyof typeof planDetails) || "free"
   const paymentSuccess = searchParams.get("payment") === "success"
+  const sessionId = searchParams.get("session_id")
 
   const [formData, setFormData] = useState({
     name: "",
@@ -57,6 +58,15 @@ function SignUpForm() {
     setError("")
 
     try {
+      console.log("Starting signup process with sessionId:", sessionId)
+
+      // Construire l'URL de redirection avec le sessionId si présent
+      const redirectUrl = sessionId
+        ? `${window.location.origin}/auth/callback?session_id=${sessionId}`
+        : `${window.location.origin}/auth/callback`
+
+      console.log("Redirect URL:", redirectUrl)
+
       // Sign up user with Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
@@ -66,7 +76,7 @@ function SignUpForm() {
             name: formData.name,
             plan: selectedPlan,
           },
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: redirectUrl,
         },
       })
 
@@ -74,20 +84,51 @@ function SignUpForm() {
         throw authError
       }
 
+      console.log("✅ User signup initiated:", authData.user?.email)
+
       if (authData.user && !authData.user.email_confirmed_at) {
         // Show email verification modal
         setUserEmail(formData.email)
         setShowEmailVerification(true)
+
         console.log("User created, email verification required:", {
           id: authData.user.id,
           email: formData.email,
           name: formData.name,
           plan: selectedPlan,
+          sessionId: sessionId,
         })
       } else if (authData.user && authData.user.email_confirmed_at) {
-        // User is already confirmed, create user record and redirect
+        // User is already confirmed, create user record and process subscription
         await createUserRecord(authData.user.id)
-        router.push("/dashboard?welcome=true")
+
+        // Si il y a un sessionId (paiement), traiter l'abonnement
+        if (sessionId) {
+          console.log("Processing pending subscription for confirmed user...")
+          try {
+            const response = await fetch("/api/process-pending-subscription", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ sessionId }),
+            })
+
+            const result = await response.json()
+            if (response.ok) {
+              console.log("✅ Subscription processed:", result)
+              router.push(`/dashboard?welcome=true&plan=${result.plan}`)
+            } else {
+              console.error("❌ Error processing subscription:", result)
+              router.push("/dashboard?welcome=true")
+            }
+          } catch (error) {
+            console.error("❌ Error processing subscription:", error)
+            router.push("/dashboard?welcome=true")
+          }
+        } else {
+          router.push("/dashboard?welcome=true")
+        }
       }
     } catch (error: any) {
       console.error("Signup error:", error)
@@ -108,6 +149,8 @@ function SignUpForm() {
 
       if (insertError) {
         console.error("Error creating user record:", insertError)
+      } else {
+        console.log("✅ User record created")
       }
     } catch (error) {
       console.error("Error in createUserRecord:", error)
@@ -116,11 +159,15 @@ function SignUpForm() {
 
   const handleResendEmail = async () => {
     try {
+      const redirectUrl = sessionId
+        ? `${window.location.origin}/auth/callback?session_id=${sessionId}`
+        : `${window.location.origin}/auth/callback`
+
       const { error } = await supabase.auth.resend({
         type: "signup",
         email: userEmail,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: redirectUrl,
         },
       })
 
@@ -167,6 +214,18 @@ function SignUpForm() {
             <p className="text-gray-400 mb-6">
               We've sent a verification link to <span className="text-white font-medium">{userEmail}</span>
             </p>
+
+            {/* Payment Success Message */}
+            {sessionId && (
+              <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4 mb-6">
+                <div className="flex items-center justify-center space-x-2">
+                  <CheckCircle className="w-5 h-5 text-green-400" />
+                  <p className="text-sm text-green-300">
+                    Payment successful! Your subscription will be activated once you verify your email.
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Instructions */}
             <div className="bg-white/5 border border-white/10 rounded-lg p-4 mb-6">

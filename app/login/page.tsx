@@ -2,191 +2,262 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, Suspense } from "react"
+import { Eye, EyeOff, Zap, Sparkles, ArrowRight, AlertCircle, CheckCircle } from "lucide-react"
 import Link from "next/link"
-import { Eye, EyeOff, Zap, Sparkles } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
+import { useRouter, useSearchParams } from "next/navigation"
 import { supabase } from "@/lib/supabase"
-import { useRouter } from "next/navigation"
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const searchParams = useSearchParams()
+  const sessionId = searchParams.get("session_id")
+  const error = searchParams.get("error")
+  const message = searchParams.get("message")
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  })
   const [showPassword, setShowPassword] = useState(false)
-  const [rememberMe, setRememberMe] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
+  const [loginError, setLoginError] = useState("")
+
+  const processSubscription = async (sessionId: string, accessToken: string) => {
+    try {
+      const response = await fetch("/api/process-pending-subscription", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ sessionId }),
+      })
+
+      const result = await response.json()
+      if (response.ok) {
+        console.log("✅ Subscription processed:", result)
+        router.push(`/dashboard?welcome=true&plan=${result.plan}&credits=${result.credits}`)
+      } else {
+        console.error("❌ Error processing subscription:", result)
+        router.push("/dashboard?error=subscription_failed")
+      }
+    } catch (error) {
+      console.error("❌ Error processing subscription:", error)
+      router.push("/dashboard?error=api_failed")
+    }
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }))
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!formData.email || !formData.password) {
+      setLoginError("Please fill in all fields")
+      return
+    }
+
     setIsLoading(true)
-    setError("")
+    setLoginError("")
 
     try {
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
       })
 
-      if (signInError) {
-        throw signInError
+      if (error) {
+        throw error
       }
 
-      if (data.user) {
-        // Check if email is verified
-        if (!data.user.email_confirmed_at) {
-          setError("Please verify your email address before signing in.")
-          await supabase.auth.signOut()
-          return
-        }
+      console.log("✅ User logged in:", data.user?.email)
 
-        console.log("User signed in successfully:", data.user.id)
+      // Attendre un peu pour que la session soit bien établie
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      // Si il y a un sessionId (venant d'un paiement), traiter l'abonnement
+      if (sessionId) {
+        console.log("Processing pending subscription after login...")
+        const { data: sessionData } = await supabase.auth.getSession()
+        const access_token = sessionData?.session?.access_token
+        await processSubscription(sessionId, access_token)
+      } else {
         router.push("/dashboard")
       }
     } catch (error: any) {
       console.error("Login error:", error)
-      setError(error.message || "An error occurred during login")
+      setLoginError(error.message || "An error occurred during login")
     } finally {
       setIsLoading(false)
     }
   }
 
+  const getErrorMessage = (errorCode: string | null) => {
+    switch (errorCode) {
+      case "session_expired":
+        return "Your session has expired. Please log in to continue."
+      case "authentication_required":
+        return "Please log in to complete your subscription."
+      case "session_error":
+        return "There was an error with your session. Please try logging in again."
+      default:
+        return null
+    }
+  }
+
+  const getMessage = (messageCode: string | null) => {
+    switch (messageCode) {
+      case "complete_subscription":
+        return "Please log in to complete your subscription setup."
+      default:
+        return null
+    }
+  }
+
+  const errorMessage = getErrorMessage(error)
+  const infoMessage = getMessage(message)
+
   return (
-    <div className="min-h-screen bg-black text-white flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background effects */}
+    <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background Effects */}
       <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-black to-blue-900/20" />
+
+      {/* Animated Background Elements */}
       <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl animate-pulse" />
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
 
-      <div className="w-full max-w-md relative z-10">
-        <div className="bg-white/5 border border-white/10 backdrop-blur-sm rounded-2xl shadow-2xl p-8">
-          {/* Logo */}
-          <div className="flex justify-center mb-8">
-            <div className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center">
-                <Zap className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                LLM Comparator
-              </span>
-            </div>
-          </div>
-
-          {/* Badge */}
-          <div className="flex justify-center mb-6">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm">
-              <Sparkles className="w-4 h-4 text-purple-400" />
-              <span className="text-sm text-gray-300">Secure Login</span>
-            </div>
-          </div>
-
-          {/* Welcome Text */}
+      {/* Login Card */}
+      <div className="relative z-10 w-full max-w-md">
+        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 shadow-2xl">
+          {/* Logo and Branding */}
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-semibold text-white mb-2">Welcome back</h1>
-            <p className="text-gray-400">Please log in to your account.</p>
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-600 to-blue-600 rounded-2xl mb-4">
+              <Zap className="w-8 h-8 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent mb-2">
+              LLM Comparator
+            </h1>
+            <div className="inline-flex items-center px-3 py-1 bg-white/10 rounded-full text-xs text-gray-300 mb-4">
+              <Sparkles className="w-3 h-3 mr-1" />
+              Secure Platform
+            </div>
+            <p className="text-gray-400">Sign in to your account</p>
           </div>
 
-          {/* Error Message */}
-          {error && (
+          {/* Session ID Notice */}
+          {sessionId && (
+            <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="w-5 h-5 text-blue-400" />
+                <div>
+                  <p className="text-sm text-blue-300 font-medium">Payment Successful!</p>
+                  <p className="text-xs text-blue-400 mt-1">Sign in to activate your subscription.</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Info Message */}
+          {infoMessage && (
+            <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+              <div className="flex items-center space-x-2">
+                <AlertCircle className="w-5 h-5 text-blue-400" />
+                <p className="text-sm text-blue-300">{infoMessage}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Error Messages */}
+          {(errorMessage || loginError) && (
             <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
-              {error}
+              {errorMessage || loginError}
             </div>
           )}
 
           {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email Field */}
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-gray-300">
+            {/* Email */}
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
                 Email Address
-              </Label>
-              <Input
-                id="email"
+              </label>
+              <input
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
                 placeholder="Enter your email"
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                 required
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-white placeholder:text-gray-500"
               />
             </div>
 
-            {/* Password Field */}
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium text-gray-300">
+            {/* Password */}
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
                 Password
-              </Label>
+              </label>
               <div className="relative">
-                <Input
-                  id="password"
+                <input
                   type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
                   placeholder="Enter your password"
+                  className="w-full px-4 py-3 pr-12 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                   required
-                  className="w-full px-3 py-2 pr-10 bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-white placeholder:text-gray-500"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
 
-            {/* Remember Me */}
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="remember"
-                checked={rememberMe}
-                onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-                className="border-white/20 data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600"
-              />
-              <Label htmlFor="remember" className="text-sm text-gray-300 cursor-pointer">
-                Remember me
-              </Label>
+            {/* Forgot Password */}
+            <div className="text-right">
+              <Link href="/forgot-password" className="text-sm text-purple-400 hover:text-purple-300 transition-colors">
+                Forgot your password?
+              </Link>
             </div>
 
-            {/* Login Button */}
-            <Button
+            {/* Sign In Button */}
+            <button
               type="submit"
-              disabled={isLoading || !email || !password}
-              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium py-2.5 rounded-lg transition-all duration-300 hover:scale-105 shadow-2xl shadow-purple-500/25 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              disabled={!formData.email || !formData.password || isLoading}
+              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-black disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02] shadow-lg shadow-purple-500/25"
             >
               {isLoading ? (
-                <div className="flex items-center justify-center space-x-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Logging in...</span>
+                <div className="flex items-center justify-center">
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                  {sessionId ? "Activating Subscription..." : "Signing in..."}
                 </div>
               ) : (
-                "Log In"
+                <div className="flex items-center justify-center">
+                  {sessionId ? "Complete Subscription" : "Sign In"}
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </div>
               )}
-            </Button>
+            </button>
           </form>
 
-          {/* Forgot Password Link */}
-          <div className="text-center mt-6">
-            <Link
-              href="/forgot-password"
-              className="text-sm text-purple-400 hover:text-purple-300 hover:underline transition-colors"
-            >
-              Forgot your password?
-            </Link>
-          </div>
-
           {/* Sign Up Link */}
-          <div className="text-center mt-8 pt-6 border-t border-white/10">
-            <p className="text-sm text-gray-400">
+          <div className="mt-8 pt-6 border-t border-white/10 text-center">
+            <p className="text-gray-400">
               Don't have an account?{" "}
               <Link
-                href="/signup"
-                className="text-purple-400 hover:text-purple-300 font-medium hover:underline transition-colors"
+                href={sessionId ? `/signup?session_id=${sessionId}` : "/signup"}
+                className="text-purple-400 hover:text-purple-300 transition-colors font-medium"
               >
                 Sign up
               </Link>
@@ -196,9 +267,23 @@ export default function LoginPage() {
 
         {/* Footer */}
         <div className="text-center mt-8">
-          <p className="text-xs text-gray-500">© 2024 LLM Comparator. All rights reserved.</p>
+          <p className="text-gray-500 text-sm">© 2024 LLM Comparator. All rights reserved.</p>
         </div>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-black flex items-center justify-center">
+          <div className="text-white">Loading...</div>
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   )
 }
