@@ -271,10 +271,13 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   try {
     console.log("💰 Processing successful payment:", invoice.id)
+    const stripePaymentIntentId = invoice.payment_intent
+    ? (invoice.payment_intent as string)
+    : `invoice_${invoice.id}`; // fallback
 
     const paymentData = {
       user_id: invoice.metadata?.user_id,
-      stripe_payment_intent_id: invoice.payment_intent as string,
+      stripe_payment_intent_id: stripePaymentIntentId,
       amount: invoice.amount_paid,
       currency: invoice.currency,
       status: "succeeded",
@@ -296,10 +299,13 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
   try {
     console.log("💸 Processing failed payment:", invoice.id)
+    const stripePaymentIntentId = invoice.payment_intent
+    ? (invoice.payment_intent as string)
+    : `invoice_${invoice.id}`; // fallback
 
     const paymentData = {
       user_id: invoice.metadata?.user_id,
-      stripe_payment_intent_id: invoice.payment_intent as string,
+      stripe_payment_intent_id: stripePaymentIntentId,
       amount: invoice.amount_due,
       currency: invoice.currency,
       status: "failed",

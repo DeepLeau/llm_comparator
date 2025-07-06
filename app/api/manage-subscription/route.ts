@@ -66,23 +66,22 @@ export async function POST(request: NextRequest) {
     }
 
     // Get the Stripe customer ID
-    const { data: customer, error: customerError } = await supabaseAdmin
+    const { data: customers, error: customerError } = await supabaseAdmin
       .from("stripe_customers")
       .select("stripe_customer_id")
       .eq("user_id", userId)
-      .single()
 
-    if (customerError || !customer) {
+    if (customerError || !customers || customers.length === 0) {
       console.error("❌ No Stripe customer found for user:", userId, customerError)
       return NextResponse.json({ error: "No customer record found" }, { status: 404 })
     }
 
-    console.log("✅ Found Stripe customer:", customer.stripe_customer_id)
+    if (customers.length > 1) {
+      console.error("❌ Multiple Stripe customers found for user:", userId)
+      return NextResponse.json({ error: "Multiple customer records found for user" }, { status: 500 })
+    }
 
-    // Extract the actual customer ID from the stored data
-    const stripeCustomerObject = JSON.parse(customer.stripe_customer_id)
-    const stripeCustomerId = stripeCustomerObject.id
-
+    const stripeCustomerId = customers[0].stripe_customer_id
     console.log("✅ Using Stripe customer ID:", stripeCustomerId)
 
     const origin = request.headers.get("origin") || "http://localhost:3000"

@@ -98,6 +98,10 @@ export async function POST(request: NextRequest) {
 
     // Créer ou récupérer le customer Stripe
     let customerId = session.customer as string
+    if (typeof customerId !== "string" && typeof customerId === "object" && "id" in customerId) {
+      customerId = customerId.id
+    }
+
 
     if (!customerId && session.customer_email) {
       console.log("Creating Stripe customer...")
