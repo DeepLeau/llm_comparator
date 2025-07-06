@@ -10,8 +10,8 @@ import { supabase } from "@/lib/supabase"
 
 const planDetails = {
   free: { name: "Free", credits: 50, icon: Zap, color: "text-blue-400" },
-  pro: { name: "Pro", credits: 1000, icon: Crown, color: "text-purple-400" },
-  business: { name: "Business", credits: 5000, icon: Building2, color: "text-green-400" },
+  pro: { name: "Pro", credits: 500, icon: Crown, color: "text-purple-400" },
+  business: { name: "Business", credits: 1500, icon: Building2, color: "text-green-400" },
 }
 
 function SignUpForm() {

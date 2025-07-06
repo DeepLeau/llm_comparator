@@ -70,11 +70,11 @@ const plans: PricingPlan[] = [
     monthlyPriceId: "",
     yearlyPriceId: "",
     description: "Perfect for getting started with LLM benchmarking",
-    testLimit: "10 tests/month",
+    testLimit: "50 tests/month",
     modelAccess: "Open-source models only",
     credits: 50,
     features: [
-      { text: "10 tests per month", included: true, icon: Zap },
+      { text: "50 tests per month", included: true, icon: Zap },
       { text: "Open-source models only", included: true, icon: Shield },
       { text: "Basic interface access", included: true, icon: Check },
       { text: "Community support", included: true, icon: Users },
@@ -99,7 +99,7 @@ const plans: PricingPlan[] = [
     description: "Ideal for professionals and growing teams",
     testLimit: "500 tests/month",
     modelAccess: "All models including premium",
-    credits: 1000,
+    credits: 500,
     features: [
       { text: "500 tests per month", included: true, icon: Zap, highlight: true },
       { text: "Access to premium models", included: true, icon: Sparkles, highlight: true },
@@ -129,7 +129,7 @@ const plans: PricingPlan[] = [
     description: "Complete solution for teams and enterprises",
     testLimit: "1,500 tests/month",
     modelAccess: "All models + API access",
-    credits: 5000,
+    credits: 1500,
     features: [
       { text: "1,500 tests per month", included: true, icon: Zap, highlight: true },
       { text: "All Pro features included", included: true, icon: Check },

@@ -65,15 +65,15 @@ async function createUserRecord(user: any, supabase: any) {
 
   const planCredits = {
     free: 50,
-    pro: 1000,
-    business: 5000,
+    pro: 500,
+    business: 1500,
   }
 
   const { error: insertError } = await supabase.from("users").insert({
     id: user.id,
     name: name,
     plan: plan,
-    credits: planCredits[plan as keyof typeof planCredits] || 50,
+    credits: planCredits[plan as keyof typeof planCredits] || 0,
   })
 
   if (insertError) {
