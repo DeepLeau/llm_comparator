@@ -83,7 +83,7 @@ export function ResultsFilters({ filters, onFiltersChange }: ResultsFiltersProps
                   Open Source
                 </SelectItem>
                 <SelectItem value="commercial" className="text-white hover:bg-gray-700">
-                  Propriétaire
+                  Proprietary
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -179,7 +179,7 @@ export function ResultsFilters({ filters, onFiltersChange }: ResultsFiltersProps
             <div className="flex flex-wrap gap-2">
               {filters.license !== "all" && (
                 <Badge variant="secondary" className="bg-green-600/20 text-green-300 border-green-600/30">
-                  {filters.license === "open-source" ? "Open Source" : "Propriétaire"}
+                  {filters.license === "open-source" ? "Open Source" : "Proprietary"}
                 </Badge>
               )}
               {filters.minQuality !== 1 && (

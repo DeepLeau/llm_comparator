@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Trophy, Star, Clock, DollarSign, TrendingUp, Award, Zap } from "lucide-react"
+import { Trophy, Star, Clock, DollarSign, Sparkles, ArrowRight } from "lucide-react"
 
 interface AIRecommendationCardProps {
   model: any
@@ -11,36 +11,6 @@ interface AIRecommendationCardProps {
 
 export function AIRecommendationCard({ model }: AIRecommendationCardProps) {
   const qualityStars = Math.round(model.qualityScore)
-
-  const getPerformanceInsight = () => {
-    if (model.qualityScore >= 4.5 && model.responseTime < 1000) {
-      return {
-        icon: <Award className="w-5 h-5 text-yellow-400" />,
-        title: "Excellent Performance",
-        description: "This model delivers exceptional quality with fast response times.",
-      }
-    } else if (model.qualityScore >= 4.0) {
-      return {
-        icon: <TrendingUp className="w-5 h-5 text-green-400" />,
-        title: "High Quality",
-        description: "This model consistently produces high-quality responses.",
-      }
-    } else if (model.responseTime < 500) {
-      return {
-        icon: <Zap className="w-5 h-5 text-blue-400" />,
-        title: "Lightning Fast",
-        description: "This model offers the fastest response times in your test.",
-      }
-    } else {
-      return {
-        icon: <Trophy className="w-5 h-5 text-purple-400" />,
-        title: "Best Overall",
-        description: "This model offers the best balance of quality, speed, and cost.",
-      }
-    }
-  }
-
-  const insight = getPerformanceInsight()
 
   return (
     <Card className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 border-blue-500/30">
@@ -50,14 +20,18 @@ export function AIRecommendationCard({ model }: AIRecommendationCardProps) {
             <Trophy className="w-6 h-6 text-blue-400" />
           </div>
           <div>
-            <span>🤖 AI Recommendation</span>
-            <p className="text-sm text-gray-400 font-normal mt-1">Based on your test results and criteria</p>
+            <span className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-blue-400" />
+              AI Recommendation
+            </span>
+            <p className="text-sm text-gray-400 font-normal mt-1">
+              Based on your test criteria, this model offers the best balance of quality, speed, and cost
+            </p>
           </div>
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Model Info */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
             <div>
               <h3 className="text-xl font-semibold text-white mb-2">{model.modelName}</h3>
@@ -71,14 +45,14 @@ export function AIRecommendationCard({ model }: AIRecommendationCardProps) {
                       : "bg-blue-600/20 text-blue-300 border-blue-600/30"
                   }`}
                 >
-                  {model.license === "open-source" ? "Open Source" : "Propriétaire"}
+                  {model.license === "open-source" ? "Open Source" : "Proprietary"}
                 </Badge>
               </div>
             </div>
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-gray-300">Average Quality</span>
+                <span className="text-gray-300">Quality Score</span>
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1">
                     {[...Array(5)].map((_, i) => (
@@ -93,7 +67,7 @@ export function AIRecommendationCard({ model }: AIRecommendationCardProps) {
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-gray-300">Average Response Time</span>
+                <span className="text-gray-300">Response Time</span>
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-blue-400" />
                   <span className="text-white font-semibold">{model.responseTime.toFixed(0)}ms</span>
@@ -107,53 +81,42 @@ export function AIRecommendationCard({ model }: AIRecommendationCardProps) {
                   <span className="text-white font-semibold">${model.cost.toFixed(4)}</span>
                 </div>
               </div>
-
-              {model.totalCost && (
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-300">Total Cost</span>
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="w-4 h-4 text-green-400" />
-                    <span className="text-white font-semibold">${model.totalCost.toFixed(4)}</span>
-                  </div>
-                </div>
-              )}
-
-              {model.successfulPrompts && model.totalPrompts && (
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-300">Success Rate</span>
-                  <span className="text-white font-semibold">
-                    {model.successfulPrompts}/{model.totalPrompts} (
-                    {((model.successfulPrompts / model.totalPrompts) * 100).toFixed(0)}%)
-                  </span>
-                </div>
-              )}
             </div>
           </div>
 
-          {/* AI Insight */}
           <div className="space-y-4">
-            <div className="flex items-center gap-3 mb-4">
-              {insight.icon}
-              <div>
-                <h4 className="text-lg font-semibold text-white">{insight.title}</h4>
-                <p className="text-gray-400 text-sm">{insight.description}</p>
+            <h4 className="text-lg font-semibold text-white">Why This Model?</h4>
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                <div>
+                  <p className="text-gray-300 text-sm">
+                    <span className="font-medium text-white">Highest Quality:</span> Achieved the best average score
+                    across all test prompts
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0"></div>
+                <div>
+                  <p className="text-gray-300 text-sm">
+                    <span className="font-medium text-white">Optimal Performance:</span> Balanced response time and cost
+                    efficiency
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 flex-shrink-0"></div>
+                <div>
+                  <p className="text-gray-300 text-sm">
+                    <span className="font-medium text-white">Reliable Results:</span> Consistent performance across
+                    different prompt types
+                  </p>
+                </div>
               </div>
             </div>
 
-            <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-700">
-              <h5 className="text-white font-medium mb-2">Why this model?</h5>
-              <ul className="text-gray-300 text-sm space-y-1">
-                {model.qualityScore >= 4.0 && <li>• Consistently high-quality responses across all test prompts</li>}
-                {model.responseTime < 1000 && <li>• Fast response times for better user experience</li>}
-                {model.cost < 0.01 && <li>• Cost-effective solution for your use case</li>}
-                {model.license === "open-source" && <li>• Open source model with flexible licensing</li>}
-                {model.successfulPrompts === model.totalPrompts && (
-                  <li>• 100% success rate across all test scenarios</li>
-                )}
-              </ul>
-            </div>
-
-            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">Use This Model</Button>
+            
           </div>
         </div>
       </CardContent>

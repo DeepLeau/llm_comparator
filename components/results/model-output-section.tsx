@@ -48,7 +48,7 @@ export function ModelOutputSection({ result }: ModelOutputSectionProps) {
                 }`}
               >
                 <Shield className="w-3 h-3 mr-1" />
-                {result.license === "open-source" ? "Open Source" : "Propriétaire"}
+                {result.license === "open-source" ? "Open Source" : "Proprietary"}
               </Badge>
             </div>
           </div>

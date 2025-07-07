@@ -30,7 +30,6 @@ export function ResultsTable({ results }: ResultsTableProps) {
             <TableHead className="text-gray-300 font-semibold">Avg Response Time</TableHead>
             <TableHead className="text-gray-300 font-semibold">Avg Cost</TableHead>
             <TableHead className="text-gray-300 font-semibold">Total Cost</TableHead>
-            <TableHead className="text-gray-300 font-semibold">Success Rate</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -64,7 +63,7 @@ export function ResultsTable({ results }: ResultsTableProps) {
                         : "bg-blue-600/20 text-blue-300 border-blue-600/30"
                     }`}
                   >
-                    {result.license === "open-source" ? "Open Source" : "Propriétaire"}
+                    {result.license === "open-source" ? "Open Source" : "Proprietary"}
                   </Badge>
                 </TableCell>
                 <TableCell>
@@ -96,16 +95,6 @@ export function ResultsTable({ results }: ResultsTableProps) {
                   <div className="flex items-center gap-2">
                     <DollarSign className={`w-4 h-4 ${totalCostColor}`} />
                     <span className="text-white font-medium">${result.totalCost.toFixed(4)}</span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="text-center">
-                    <span className="text-white font-medium">
-                      {result.successfulPrompts}/{result.totalPrompts}
-                    </span>
-                    <div className="text-xs text-gray-400">
-                      {((result.successfulPrompts / result.totalPrompts) * 100).toFixed(0)}%
-                    </div>
                   </div>
                 </TableCell>
               </TableRow>

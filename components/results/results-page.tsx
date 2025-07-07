@@ -287,16 +287,7 @@ export function ResultsPage() {
 
   const exportResults = () => {
     const csvContent = [
-      [
-        "Model",
-        "Provider",
-        "Avg Quality Score",
-        "Avg Response Time (ms)",
-        "Avg Cost ($)",
-        "Total Cost ($)",
-        "License",
-        "Success Rate",
-      ],
+      ["Model", "Provider", "Avg Quality Score", "Avg Response Time (ms)", "Avg Cost ($)", "Total Cost ($)", "License"],
       ...filteredAggregatedResults.map((result: any) => [
         result.modelName,
         result.provider,
@@ -305,7 +296,6 @@ export function ResultsPage() {
         result.cost.toFixed(4),
         result.totalCost.toFixed(4),
         result.license,
-        `${result.successfulPrompts}/${result.totalPrompts}`,
       ]),
     ]
       .map((row) => row.join(","))
