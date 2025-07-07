@@ -3,10 +3,9 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Star, Clock, DollarSign } from "lucide-react"
-import type { TestResult } from "./results-page"
 
 interface ResultsTableProps {
-  results: TestResult[]
+  results: any[]
 }
 
 export function ResultsTable({ results }: ResultsTableProps) {
@@ -27,9 +26,11 @@ export function ResultsTable({ results }: ResultsTableProps) {
             <TableHead className="text-gray-300 font-semibold">Model</TableHead>
             <TableHead className="text-gray-300 font-semibold">Provider</TableHead>
             <TableHead className="text-gray-300 font-semibold">License</TableHead>
-            <TableHead className="text-gray-300 font-semibold">Quality</TableHead>
-            <TableHead className="text-gray-300 font-semibold">Response Time</TableHead>
-            <TableHead className="text-gray-300 font-semibold">Cost</TableHead>
+            <TableHead className="text-gray-300 font-semibold">Avg Quality</TableHead>
+            <TableHead className="text-gray-300 font-semibold">Avg Response Time</TableHead>
+            <TableHead className="text-gray-300 font-semibold">Avg Cost</TableHead>
+            <TableHead className="text-gray-300 font-semibold">Total Cost</TableHead>
+            <TableHead className="text-gray-300 font-semibold">Success Rate</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -41,8 +42,10 @@ export function ResultsTable({ results }: ResultsTableProps) {
                 : result.responseTime < 2000
                   ? "text-yellow-400"
                   : "text-red-400"
-            const costColor =
+            const avgCostColor =
               result.cost < 0.01 ? "text-green-400" : result.cost < 0.05 ? "text-yellow-400" : "text-red-400"
+            const totalCostColor =
+              result.totalCost < 0.1 ? "text-green-400" : result.totalCost < 0.5 ? "text-yellow-400" : "text-red-400"
 
             return (
               <TableRow key={result.id} className="border-gray-800 hover:bg-gray-800/30">
@@ -61,7 +64,7 @@ export function ResultsTable({ results }: ResultsTableProps) {
                         : "bg-blue-600/20 text-blue-300 border-blue-600/30"
                     }`}
                   >
-                    {result.license === "open-source" ? "Open Source" : "Commercial"}
+                    {result.license === "open-source" ? "Open Source" : "Propriétaire"}
                   </Badge>
                 </TableCell>
                 <TableCell>
@@ -85,8 +88,24 @@ export function ResultsTable({ results }: ResultsTableProps) {
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    <DollarSign className={`w-4 h-4 ${costColor}`} />
+                    <DollarSign className={`w-4 h-4 ${avgCostColor}`} />
                     <span className="text-white">${result.cost.toFixed(4)}</span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <DollarSign className={`w-4 h-4 ${totalCostColor}`} />
+                    <span className="text-white font-medium">${result.totalCost.toFixed(4)}</span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="text-center">
+                    <span className="text-white font-medium">
+                      {result.successfulPrompts}/{result.totalPrompts}
+                    </span>
+                    <div className="text-xs text-gray-400">
+                      {((result.successfulPrompts / result.totalPrompts) * 100).toFixed(0)}%
+                    </div>
                   </div>
                 </TableCell>
               </TableRow>

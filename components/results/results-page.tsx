@@ -10,26 +10,13 @@ import { ResultsFilters, type FilterState } from "./results-filters"
 import { ResultsTable } from "./results-table"
 import { ModelOutputSection } from "./model-output-section"
 import { ResultsPagination } from "./results-pagination"
-import { useWorkflow } from "@/contexts/workflow-context"
-
-export interface TestResult {
-  id: string
-  modelName: string
-  provider: string
-  prompt: string
-  response: string
-  qualityScore: number
-  responseTime: number
-  cost: number
-  license: "open-source" | "commercial"
-  timestamp: Date
-}
+import { getCurrentTestSession } from "@/lib/test-results"
 
 const ITEMS_PER_PAGE = 10
 
 export function ResultsPage() {
   const router = useRouter()
-  const { state } = useWorkflow()
+  const [testSession, setTestSession] = useState<any>(null)
 
   // Initialize filters with default values
   const [filters, setFilters] = useState<FilterState>({
@@ -43,101 +30,122 @@ export function ResultsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [outputCurrentPage, setOutputCurrentPage] = useState(1)
 
-  // Redirect if no data
+  // Load test session
   useEffect(() => {
-    if (!state.selectedModels.length || !state.prompts.length) {
-      console.log("No data found, redirecting to use case selection")
+    const session = getCurrentTestSession()
+    if (session) {
+      setTestSession(session)
+    } else {
+      console.log("No test session found, redirecting to use case selection")
       router.push("/use-case-selection")
     }
-  }, [state.selectedModels, state.prompts, router])
+  }, [router])
 
-  // Generate test results based on user selections - one result per model (not per prompt)
-  const allResults = useMemo(() => {
-    if (!state.selectedModels.length || !state.prompts.length) {
-      console.log("No models or prompts available for results generation")
-      return []
-    }
+  // Convert test results to individual prompt results for Model Outputs section
+  const allIndividualResults = useMemo(() => {
+    if (!testSession?.results) return []
 
-    console.log("Generating results for:", {
-      models: state.selectedModels.map((m) => ({
-        id: m.id,
-        name: m.name,
-        license: m.license,
-      })),
-      prompts: state.prompts.length,
-      useCase: state.selectedUseCase?.name,
-    })
-
-    const results: TestResult[] = []
-
-    // Generate one result per model (using the first prompt as representative)
-    state.selectedModels.forEach((model) => {
-      const representativePrompt = state.prompts[0] // Use first prompt as representative
-
-      // Ensure license is properly mapped
-      let modelLicense: "open-source" | "commercial" = "commercial"
-      if (model.license === "open-source" || model.license === "Open-source" || model.license === "Open Source") {
-        modelLicense = "open-source"
-      } else if (model.license === "commercial" || model.license === "Commercial") {
-        modelLicense = "commercial"
+    return testSession.results.flatMap((result: any) => {
+      if (!result.promptResults || result.promptResults.length === 0) {
+        // Si pas de promptResults, créer un résultat unique
+        return [
+          {
+            id: result.id,
+            modelName: result.modelName,
+            provider: result.provider,
+            prompt: testSession.prompts?.[0] || "No prompt",
+            response: result.error || "No response available",
+            qualityScore: result.averageScore || 0,
+            responseTime: result.averageResponseTime || 0,
+            cost: result.averageCost || 0,
+            license: result.isOpenSource ? "open-source" : "commercial",
+            timestamp: new Date(),
+          },
+        ]
       }
 
-      // Generate contextual responses based on use case
-      const response = generateContextualResponse(
-        state.selectedUseCase?.id || "content-generation",
-        model.name,
-        representativePrompt.content || representativePrompt.userPrompt || "No prompt content",
-      )
+      // Créer un résultat pour chaque prompt
+      return result.promptResults.map((promptResult: any, index: number) => ({
+        id: `${result.id}-${index}`,
+        modelName: result.modelName,
+        provider: result.provider,
+        prompt: promptResult.prompt,
+        response: promptResult.error || promptResult.response,
+        qualityScore: promptResult.score || 0,
+        responseTime: promptResult.responseTime || 0,
+        cost: promptResult.cost || 0,
+        license: result.isOpenSource ? "open-source" : "commercial",
+        timestamp: new Date(),
+      }))
+    })
+  }, [testSession])
 
-      const result: TestResult = {
-        id: `${model.id}-summary`,
-        modelName: model.name,
-        provider: model.provider,
-        prompt: representativePrompt.content || representativePrompt.userPrompt || "No prompt content",
-        response,
-        qualityScore: Math.random() * 2 + 3, // 3-5 range
-        responseTime: Math.random() * 2000 + 500, // 500-2500ms
-        cost: (model.costPer1kTokens * (Math.random() * 500 + 100)) / 1000, // Simulate token usage
-        license: modelLicense,
+  // Convert test results to aggregated model results for Results Overview table
+  const aggregatedModelResults = useMemo(() => {
+    if (!testSession?.results) return []
+
+    return testSession.results.map((result: any) => {
+      // Calculer les moyennes à partir des promptResults
+      let avgQuality = 0
+      let avgResponseTime = 0
+      let avgCost = 0
+      let totalCost = 0
+      let successfulPrompts = 0
+
+      if (result.promptResults && result.promptResults.length > 0) {
+        const validResults = result.promptResults.filter((pr: any) => !pr.error)
+        successfulPrompts = validResults.length
+
+        if (validResults.length > 0) {
+          avgQuality = validResults.reduce((sum: number, pr: any) => sum + (pr.score || 0), 0) / validResults.length
+          avgResponseTime =
+            validResults.reduce((sum: number, pr: any) => sum + (pr.responseTime || 0), 0) / validResults.length
+          avgCost = validResults.reduce((sum: number, pr: any) => sum + (pr.cost || 0), 0) / validResults.length
+          totalCost = validResults.reduce((sum: number, pr: any) => sum + (pr.cost || 0), 0)
+        }
+      } else {
+        // Fallback sur les données agrégées du résultat
+        avgQuality = result.averageScore || 0
+        avgResponseTime = result.averageResponseTime || 0
+        avgCost = result.averageCost || 0
+        totalCost = result.totalCost || 0
+        successfulPrompts = 1
+      }
+
+      return {
+        id: result.id,
+        modelName: result.modelName,
+        provider: result.provider,
+        qualityScore: avgQuality,
+        responseTime: avgResponseTime,
+        cost: avgCost,
+        totalCost: totalCost,
+        license: result.isOpenSource ? "open-source" : "commercial",
+        successfulPrompts: successfulPrompts,
+        totalPrompts: result.promptResults?.length || 1,
         timestamp: new Date(),
       }
-
-      results.push(result)
     })
+  }, [testSession])
 
-    console.log(
-      "Generated unique results:",
-      results.map((r) => ({
-        model: r.modelName,
-        license: r.license,
-        cost: r.cost.toFixed(4),
-        quality: r.qualityScore.toFixed(1),
-      })),
-    )
+  // Apply filters and sorting to aggregated results
+  const filteredAggregatedResults = useMemo(() => {
+    if (!aggregatedModelResults.length) return []
 
-    return results
-  }, [state.selectedModels, state.prompts, state.selectedUseCase])
-
-  // Apply filters and sorting
-  const filteredResults = useMemo(() => {
-    console.log("Applying filters:", filters)
-    console.log("All results before filtering:", allResults.length)
-
-    const filtered = allResults.filter((result) => {
+    const filtered = aggregatedModelResults.filter((result: any) => {
       // License filter
       if (filters.license !== "all") {
-        console.log(`Filtering by license: ${filters.license}, result license: ${result.license}`)
         if (result.license !== filters.license) {
           return false
         }
       }
 
-      // Min quality filter (show models with quality >= minQuality)
+      // Min quality filter
       if (result.qualityScore < filters.minQuality) {
         return false
       }
 
-      // Max cost filter (show models that cost LESS than or equal to the max cost)
+      // Max cost filter
       if (result.cost > filters.maxCost) {
         return false
       }
@@ -145,10 +153,8 @@ export function ResultsPage() {
       return true
     })
 
-    console.log("Filtered results:", filtered.length)
-
     // Apply sorting
-    filtered.sort((a, b) => {
+    filtered.sort((a: any, b: any) => {
       let aValue: any, bValue: any
 
       switch (filters.sortBy) {
@@ -184,7 +190,71 @@ export function ResultsPage() {
     })
 
     return filtered
-  }, [allResults, filters])
+  }, [aggregatedModelResults, filters])
+
+  // Apply filters to individual results for Model Outputs
+  const filteredIndividualResults = useMemo(() => {
+    if (!allIndividualResults.length) return []
+
+    const filtered = allIndividualResults.filter((result: any) => {
+      // License filter
+      if (filters.license !== "all") {
+        if (result.license !== filters.license) {
+          return false
+        }
+      }
+
+      // Min quality filter
+      if (result.qualityScore < filters.minQuality) {
+        return false
+      }
+
+      // Max cost filter
+      if (result.cost > filters.maxCost) {
+        return false
+      }
+
+      return true
+    })
+
+    // Apply sorting
+    filtered.sort((a: any, b: any) => {
+      let aValue: any, bValue: any
+
+      switch (filters.sortBy) {
+        case "quality":
+          aValue = a.qualityScore
+          bValue = b.qualityScore
+          break
+        case "cost":
+          aValue = a.cost
+          bValue = b.cost
+          break
+        case "responseTime":
+          aValue = a.responseTime
+          bValue = b.responseTime
+          break
+        case "model":
+          aValue = a.modelName
+          bValue = b.modelName
+          break
+        case "license":
+          aValue = a.license
+          bValue = b.license
+          break
+        default:
+          return 0
+      }
+
+      if (typeof aValue === "string") {
+        return filters.sortOrder === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue)
+      }
+
+      return filters.sortOrder === "asc" ? aValue - bValue : bValue - aValue
+    })
+
+    return filtered
+  }, [allIndividualResults, filters])
 
   // Reset pagination when filters change
   useEffect(() => {
@@ -192,37 +262,50 @@ export function ResultsPage() {
     setOutputCurrentPage(1)
   }, [filters])
 
-  // Pagination for results table
-  const paginatedResults = useMemo(() => {
+  // Pagination for results table (aggregated)
+  const paginatedAggregatedResults = useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
-    return filteredResults.slice(startIndex, startIndex + ITEMS_PER_PAGE)
-  }, [filteredResults, currentPage])
+    return filteredAggregatedResults.slice(startIndex, startIndex + ITEMS_PER_PAGE)
+  }, [filteredAggregatedResults, currentPage])
 
-  // Pagination for model outputs
-  const paginatedOutputs = useMemo(() => {
+  // Pagination for model outputs (individual)
+  const paginatedIndividualOutputs = useMemo(() => {
     const startIndex = (outputCurrentPage - 1) * ITEMS_PER_PAGE
-    return filteredResults.slice(startIndex, startIndex + ITEMS_PER_PAGE)
-  }, [filteredResults, outputCurrentPage])
+    return filteredIndividualResults.slice(startIndex, startIndex + ITEMS_PER_PAGE)
+  }, [filteredIndividualResults, outputCurrentPage])
 
-  // Find recommended model (highest quality score)
+  // Find recommended model (highest quality score from aggregated results)
   const recommendedModel = useMemo(() => {
-    if (filteredResults.length === 0) return null
-    return filteredResults.reduce((best, current) => (current.qualityScore > best.qualityScore ? current : best))
-  }, [filteredResults])
+    if (filteredAggregatedResults.length === 0) return null
+    return filteredAggregatedResults.reduce((best: any, current: any) =>
+      current.qualityScore > best.qualityScore ? current : best,
+    )
+  }, [filteredAggregatedResults])
 
-  const totalPages = Math.ceil(filteredResults.length / ITEMS_PER_PAGE)
+  const totalPagesAggregated = Math.ceil(filteredAggregatedResults.length / ITEMS_PER_PAGE)
+  const totalPagesIndividual = Math.ceil(filteredIndividualResults.length / ITEMS_PER_PAGE)
 
   const exportResults = () => {
     const csvContent = [
-      ["Model", "Provider", "Prompt", "Quality Score", "Response Time (ms)", "Cost ($)", "License"],
-      ...filteredResults.map((result) => [
+      [
+        "Model",
+        "Provider",
+        "Avg Quality Score",
+        "Avg Response Time (ms)",
+        "Avg Cost ($)",
+        "Total Cost ($)",
+        "License",
+        "Success Rate",
+      ],
+      ...filteredAggregatedResults.map((result: any) => [
         result.modelName,
         result.provider,
-        result.prompt.replace(/,/g, ";"), // Replace commas to avoid CSV issues
         result.qualityScore.toFixed(2),
         result.responseTime.toFixed(0),
         result.cost.toFixed(4),
+        result.totalCost.toFixed(4),
         result.license,
+        `${result.successfulPrompts}/${result.totalPrompts}`,
       ]),
     ]
       .map((row) => row.join(","))
@@ -239,7 +322,7 @@ export function ResultsPage() {
     URL.revokeObjectURL(url)
   }
 
-  if (!state.selectedModels.length || !state.prompts.length) {
+  if (!testSession) {
     return null // Will redirect
   }
 
@@ -262,9 +345,8 @@ export function ResultsPage() {
               <div>
                 <h1 className="text-xl font-semibold text-white">Test Results</h1>
                 <p className="text-sm text-gray-400">
-                  {state.selectedModels.length} models • {state.prompts.length} prompts • {filteredResults.length}{" "}
-                  results
-                  {state.selectedUseCase && ` • ${state.selectedUseCase.name}`}
+                  {testSession.stats?.totalModels || testSession.results?.length || 0} models •{" "}
+                  {testSession.stats?.successfulTests || 0} successful • {filteredAggregatedResults.length} results
                 </p>
               </div>
             </div>
@@ -280,11 +362,11 @@ export function ResultsPage() {
               </Button>
               <Button
                 size="sm"
-                onClick={() => router.push("/dashboard")}
+                onClick={() => router.push("/compare")}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 <ExternalLink className="w-4 h-4 mr-2" />
-                Dashboard
+                Advanced Compare
               </Button>
             </div>
           </div>
@@ -305,27 +387,35 @@ export function ResultsPage() {
               <h2 className="text-2xl font-bold text-white">Results Overview</h2>
               <div className="flex items-center gap-2">
                 <Badge variant="secondary" className="bg-blue-600/20 text-blue-300 border-blue-600/30">
-                  {filteredResults.length} Results
+                  {filteredAggregatedResults.length} Models
                 </Badge>
                 <Badge variant="secondary" className="bg-green-600/20 text-green-300 border-green-600/30">
                   Avg Quality:{" "}
-                  {filteredResults.length > 0
-                    ? (filteredResults.reduce((sum, r) => sum + r.qualityScore, 0) / filteredResults.length).toFixed(1)
+                  {filteredAggregatedResults.length > 0
+                    ? (
+                        filteredAggregatedResults.reduce((sum: number, r: any) => sum + r.qualityScore, 0) /
+                        filteredAggregatedResults.length
+                      ).toFixed(1)
                     : "0"}
                 </Badge>
                 <Badge variant="secondary" className="bg-orange-600/20 text-orange-300 border-orange-600/30">
                   Avg Cost: $
-                  {filteredResults.length > 0
-                    ? (filteredResults.reduce((sum, r) => sum + r.cost, 0) / filteredResults.length).toFixed(4)
+                  {filteredAggregatedResults.length > 0
+                    ? (
+                        filteredAggregatedResults.reduce((sum: number, r: any) => sum + r.cost, 0) /
+                        filteredAggregatedResults.length
+                      ).toFixed(4)
                     : "0"}
                 </Badge>
               </div>
             </div>
-
-            <ResultsTable results={paginatedResults} />
-
-            {totalPages > 1 && (
-              <ResultsPagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+            <ResultsTable results={paginatedAggregatedResults} />
+            {totalPagesAggregated > 1 && (
+              <ResultsPagination
+                currentPage={currentPage}
+                totalPages={totalPagesAggregated}
+                onPageChange={setCurrentPage}
+              />
             )}
           </div>
 
@@ -334,20 +424,18 @@ export function ResultsPage() {
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold text-white">Model Outputs</h2>
               <Badge variant="secondary" className="bg-purple-600/20 text-purple-300 border-purple-600/30">
-                {filteredResults.length} Outputs
+                {filteredIndividualResults.length} Outputs
               </Badge>
             </div>
-
             <div className="space-y-6">
-              {paginatedOutputs.map((result) => (
+              {paginatedIndividualOutputs.map((result: any) => (
                 <ModelOutputSection key={result.id} result={result} />
               ))}
             </div>
-
-            {totalPages > 1 && (
+            {totalPagesIndividual > 1 && (
               <ResultsPagination
                 currentPage={outputCurrentPage}
-                totalPages={totalPages}
+                totalPages={totalPagesIndividual}
                 onPageChange={setOutputCurrentPage}
               />
             )}
@@ -356,50 +444,4 @@ export function ResultsPage() {
       </div>
     </div>
   )
-}
-
-function generateContextualResponse(useCaseId: string, modelName: string, prompt: string): string {
-  const responses: Record<string, string[]> = {
-    "content-generation": [
-      `Here's a compelling product description that highlights key features and benefits, crafted to engage your target audience and drive conversions.`,
-      `I've created engaging social media content that balances informative value with entertainment, optimized for maximum reach and engagement.`,
-      `This blog post combines SEO best practices with valuable insights, structured to keep readers engaged from introduction to conclusion.`,
-      `Here's a professional newsletter that maintains brand voice while delivering valuable content to your subscribers.`,
-    ],
-    "code-assistance": [
-      `\`\`\`python\ndef optimize_function(data):\n    # Optimized implementation with error handling\n    try:\n        result = process_data(data)\n        return result\n    except Exception as e:\n        logger.error(f"Error processing: {e}")\n        return None\n\`\`\``,
-      `I've identified the bug in your code. The issue is in the loop condition. Here's the corrected version with proper error handling and optimization.`,
-      `Here's comprehensive documentation for your function, including parameter descriptions, return values, and usage examples.`,
-      `\`\`\`python\ndef test_function():\n    assert function_name(test_input) == expected_output\n    assert function_name(edge_case) == edge_result\n\`\`\``,
-    ],
-    "data-analysis": [
-      `Based on the sales data analysis, I've identified a 23% increase in Q3 performance, with the highest growth in the mobile segment. Key trends show seasonal patterns that suggest optimal timing for future campaigns.`,
-      `Customer feedback analysis reveals 87% satisfaction rate with three main improvement areas: response time, product variety, and pricing transparency. Detailed breakdown shows regional variations in preferences.`,
-      `Financial report analysis indicates strong revenue growth of 15% YoY, with improved profit margins in core business segments. Risk factors include market volatility and supply chain dependencies.`,
-      `The data visualization reveals clear correlations between marketing spend and customer acquisition, with optimal ROI achieved at $2.3K monthly budget allocation.`,
-    ],
-    "customer-support": [
-      `Thank you for contacting us! I understand your concern about the product delivery. I've checked your order status and can confirm it's currently in transit. You should receive it within 2-3 business days. I'll send you tracking information shortly.`,
-      `I apologize for the inconvenience you've experienced. Let me help resolve this issue immediately. I've escalated your case to our technical team and you can expect a resolution within 24 hours. Here's your reference number: CS-2024-001.`,
-      `Here's a comprehensive FAQ response that addresses the most common questions about our service, including step-by-step troubleshooting guides and contact information for additional support.`,
-      `I've created an automated email response template that maintains a personal touch while efficiently addressing common customer inquiries and providing relevant resources.`,
-    ],
-    translation: [
-      `Voici la traduction française de votre contenu marketing, adaptée culturellement pour le marché francophone avec les nuances appropriées et le ton professionnel requis.`,
-      `Here's the English localization of your content, adapted for the US market with appropriate cultural references and business terminology that resonates with your target audience.`,
-      `Esta es la traducción al español de su documentación técnica, manteniendo la precisión técnica mientras se adapta a las convenciones lingüísticas del mercado hispanohablante.`,
-      `I've translated your marketing materials with cultural adaptation, ensuring the message resonates with local audiences while maintaining brand consistency and compliance with regional regulations.`,
-    ],
-    research: [
-      `Based on comprehensive research analysis, the academic literature shows strong consensus on this topic with 89% of studies supporting the primary hypothesis. Key findings include methodological improvements and practical applications.`,
-      `Market research indicates significant growth potential in the target segment, with projected 34% CAGR over the next 5 years. Competitive analysis reveals three main market leaders and emerging opportunities.`,
-      `Executive summary: The research findings support strategic expansion into new markets, with recommended investment of $2.5M over 18 months. Risk mitigation strategies and success metrics are outlined in the detailed report.`,
-      `Industry trend analysis reveals shifting consumer preferences toward sustainable solutions, with 67% of surveyed customers willing to pay premium prices for environmentally conscious products.`,
-    ],
-  }
-
-  const useCaseResponses = responses[useCaseId] || responses["content-generation"]
-  const randomResponse = useCaseResponses[Math.floor(Math.random() * useCaseResponses.length)]
-
-  return `${randomResponse}\n\n[Generated by ${modelName}]`
 }

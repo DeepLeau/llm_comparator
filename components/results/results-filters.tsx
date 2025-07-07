@@ -64,7 +64,6 @@ export function ResultsFilters({ filters, onFiltersChange }: ResultsFiltersProps
             </Button>
           )}
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           {/* License Filter */}
           <div className="space-y-2">
@@ -84,7 +83,7 @@ export function ResultsFilters({ filters, onFiltersChange }: ResultsFiltersProps
                   Open Source
                 </SelectItem>
                 <SelectItem value="commercial" className="text-white hover:bg-gray-700">
-                  Commercial
+                  Propriétaire
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -180,7 +179,7 @@ export function ResultsFilters({ filters, onFiltersChange }: ResultsFiltersProps
             <div className="flex flex-wrap gap-2">
               {filters.license !== "all" && (
                 <Badge variant="secondary" className="bg-green-600/20 text-green-300 border-green-600/30">
-                  {filters.license === "open-source" ? "Open Source" : "Commercial"}
+                  {filters.license === "open-source" ? "Open Source" : "Propriétaire"}
                 </Badge>
               )}
               {filters.minQuality !== 1 && (

@@ -5,10 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Copy, Check, Star, Clock, DollarSign, MessageSquare, Shield } from "lucide-react"
-import type { TestResult } from "./results-page"
 
 interface ModelOutputSectionProps {
-  result: TestResult
+  result: any
 }
 
 export function ModelOutputSection({ result }: ModelOutputSectionProps) {
@@ -49,7 +48,7 @@ export function ModelOutputSection({ result }: ModelOutputSectionProps) {
                 }`}
               >
                 <Shield className="w-3 h-3 mr-1" />
-                {result.license === "open-source" ? "Open Source" : "Commercial"}
+                {result.license === "open-source" ? "Open Source" : "Propriétaire"}
               </Badge>
             </div>
           </div>
@@ -63,7 +62,6 @@ export function ModelOutputSection({ result }: ModelOutputSectionProps) {
             {copied ? "Copied!" : "Copy"}
           </Button>
         </div>
-
         {/* Performance Metrics */}
         <div className="flex items-center gap-6 pt-2">
           <div className="flex items-center gap-2">
@@ -77,19 +75,16 @@ export function ModelOutputSection({ result }: ModelOutputSectionProps) {
             </div>
             <span className="text-white text-sm font-medium">{result.qualityScore.toFixed(1)}</span>
           </div>
-
           <div className="flex items-center gap-2">
             <Clock className={`w-4 h-4 ${responseTimeColor}`} />
             <span className="text-gray-300 text-sm">{result.responseTime.toFixed(0)}ms</span>
           </div>
-
           <div className="flex items-center gap-2">
             <DollarSign className={`w-4 h-4 ${costColor}`} />
             <span className="text-gray-300 text-sm">${result.cost.toFixed(4)}</span>
           </div>
         </div>
       </CardHeader>
-
       <CardContent className="space-y-4">
         {/* Prompt */}
         <div>
@@ -98,7 +93,6 @@ export function ModelOutputSection({ result }: ModelOutputSectionProps) {
             <p className="text-gray-300 text-sm">{result.prompt}</p>
           </div>
         </div>
-
         {/* Response */}
         <div>
           <h4 className="text-sm font-medium text-gray-300 mb-2">Response</h4>
@@ -108,7 +102,6 @@ export function ModelOutputSection({ result }: ModelOutputSectionProps) {
             </div>
           </div>
         </div>
-
         {/* Timestamp */}
         <div className="flex justify-between items-center text-xs text-gray-500 pt-2 border-t border-gray-800">
           <span>Generated on {result.timestamp.toLocaleString()}</span>

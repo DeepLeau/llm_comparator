@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 
 interface ResultsPaginationProps {
   currentPage: number
@@ -49,23 +49,15 @@ export function ResultsPagination({ currentPage, totalPages, onPageChange }: Res
         disabled={currentPage === 1}
         className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white bg-transparent disabled:opacity-50"
       >
-        <ChevronLeft className="w-4 h-4 mr-1" />
-        Previous
+        <ChevronLeft className="w-4 h-4" />
       </Button>
 
-      <div className="flex items-center space-x-1">
-        {visiblePages.map((page, index) => {
-          if (page === "...") {
-            return (
-              <Button key={index} variant="ghost" size="sm" disabled className="text-gray-500">
-                <MoreHorizontal className="w-4 h-4" />
-              </Button>
-            )
-          }
-
-          return (
+      {visiblePages.map((page, index) => (
+        <div key={index}>
+          {page === "..." ? (
+            <span className="px-3 py-2 text-gray-500">...</span>
+          ) : (
             <Button
-              key={page}
               variant={currentPage === page ? "default" : "outline"}
               size="sm"
               onClick={() => onPageChange(page as number)}
@@ -77,9 +69,9 @@ export function ResultsPagination({ currentPage, totalPages, onPageChange }: Res
             >
               {page}
             </Button>
-          )
-        })}
-      </div>
+          )}
+        </div>
+      ))}
 
       <Button
         variant="outline"
@@ -88,8 +80,7 @@ export function ResultsPagination({ currentPage, totalPages, onPageChange }: Res
         disabled={currentPage === totalPages}
         className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white bg-transparent disabled:opacity-50"
       >
-        Next
-        <ChevronRight className="w-4 h-4 ml-1" />
+        <ChevronRight className="w-4 h-4" />
       </Button>
     </div>
   )
