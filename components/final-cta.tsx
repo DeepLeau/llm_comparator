@@ -1,13 +1,11 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Sparkles } from "lucide-react"
 
-interface FinalCTAProps {
-  onCompareNow: () => void
-}
-
-export function FinalCTA({ onCompareNow }: FinalCTAProps) {
+export function FinalCTA() {
+  const router = useRouter()
   return (
     <section className="py-24 px-6 relative overflow-hidden">
       {/* Background effects */}
@@ -30,7 +28,7 @@ export function FinalCTA({ onCompareNow }: FinalCTAProps) {
 
         <Button
           size="lg"
-          onClick={onCompareNow}
+          onClick={() => router.push("/login")}
           className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-2xl shadow-purple-500/25 transition-all duration-300 hover:scale-105"
         >
           Compare your prompt now
