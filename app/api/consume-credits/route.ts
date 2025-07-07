@@ -10,8 +10,15 @@ const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, proces
 
 export async function POST(request: NextRequest) {
   try {
+    const { creditsToConsume } = await request.json()
+
+    if (!creditsToConsume || creditsToConsume <= 0) {
+      return NextResponse.json({ error: "Invalid credits amount" }, { status: 400 })
+    }
+
+    // Récupérer l'utilisateur depuis le token
     const authHeader = request.headers.get("authorization")
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (!authHeader?.startsWith("Bearer ")) {
       return NextResponse.json({ error: "Missing or invalid authorization header" }, { status: 401 })
     }
 
@@ -22,17 +29,10 @@ export async function POST(request: NextRequest) {
     } = await supabaseAdmin.auth.getUser(token)
 
     if (authError || !user) {
-      console.error("Auth error:", authError)
       return NextResponse.json({ error: "Invalid token" }, { status: 401 })
     }
 
-    const { creditsToConsume } = await request.json()
-
-    if (!creditsToConsume || creditsToConsume <= 0) {
-      return NextResponse.json({ error: "Invalid credits to consume" }, { status: 400 })
-    }
-
-    // Get current credits first
+    // Récupérer les crédits actuels
     const { data: userData, error: fetchError } = await supabaseAdmin
       .from("users")
       .select("credits")
@@ -44,25 +44,36 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Failed to fetch user credits" }, { status: 500 })
     }
 
-    const currentCredits = userData?.credits || 0
+    const currentCredits = userData.credits || 0
     const newCredits = currentCredits - creditsToConsume
 
+    // Vérifier si l'utilisateur a assez de crédits
     if (newCredits < 0) {
-      return NextResponse.json({ error: "Insufficient credits" }, { status: 400 })
+      return NextResponse.json(
+        { error: "Insufficient credits", currentCredits, required: creditsToConsume },
+        { status: 400 },
+      )
     }
 
-    // Update user's credits
-    const { error: updateError } = await supabaseAdmin.from("users").update({ credits: newCredits }).eq("id", user.id)
+    // Mettre à jour les crédits
+    const { data: updatedUser, error: updateError } = await supabaseAdmin
+      .from("users")
+      .update({
+        credits: newCredits,
+      })
+      .eq("id", user.id)
+      .select("credits")
+      .single()
 
     if (updateError) {
-      console.error("Error consuming credits:", updateError)
-      return NextResponse.json({ error: "Failed to consume credits" }, { status: 500 })
+      console.error("Error updating user credits:", updateError)
+      return NextResponse.json({ error: "Failed to update credits" }, { status: 500 })
     }
 
     return NextResponse.json({
       success: true,
       creditsConsumed: creditsToConsume,
-      remainingCredits: newCredits,
+      remainingCredits: updatedUser.credits,
     })
   } catch (error) {
     console.error("Error in consume-credits:", error)

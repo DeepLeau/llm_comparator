@@ -14,6 +14,7 @@ interface TestModelRequest {
   selectedModelIds: string[]
   systemPrompt: string
   prompts: string[] // Changé de userPrompt à prompts (array)
+  useCase?: string // Ajout du use case
 }
 
 interface ModelPromptResult {
@@ -46,12 +47,13 @@ interface ModelResult {
 export async function POST(request: NextRequest) {
   try {
     const body: TestModelRequest = await request.json()
-    const { selectedModelIds, systemPrompt, prompts } = body
+    const { selectedModelIds, systemPrompt, prompts, useCase } = body
 
     console.log("=== STARTING MULTI-PROMPT MODEL TESTS ===")
     console.log("Selected models:", selectedModelIds)
     console.log("System prompt:", systemPrompt)
     console.log("Number of prompts:", prompts?.length || 0)
+    console.log("Use case:", useCase)
     console.log("Prompts:", prompts)
 
     // Validation
@@ -396,7 +398,7 @@ Réponds UNIQUEMENT avec les notes séparées par des virgules, dans l'ordre des
           .from("tests")
           .insert({
             user_id: userId,
-            use_case: "general", // Vous pouvez passer ce paramètre depuis le frontend si nécessaire
+            use_case: useCase || "general", // Utiliser le vrai use case ou fallback
             total_cost: successfulPromptTests, // Nombre de crédits consommés (tests réussis)
           })
           .select("id")
