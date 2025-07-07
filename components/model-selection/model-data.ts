@@ -2,13 +2,17 @@ export interface LLMModel {
   id: string
   name: string
   provider: string
+  context_length: number
+  is_open_source: boolean
+  stores_data: boolean
+  pricing_prompt: number
+  pricing_completion: number
   license: "Open Source" | "Commercial"
   speedScore: number // 1-5
   costPer1kTokens: number
   qualityScore: number // 1-5
   recommended: boolean
   category: "Text" | "Code" | "Multimodal" | "Embedding"
-  contextLength: number
 }
 
 const providers = [
@@ -57,6 +61,15 @@ const modelNames = {
   IBM: ["Granite", "Watson", "CodeNet", "Project Debater"],
 }
 
+export interface ModelFilters {
+  searchQuery: string
+  licenseFilter: "all" | "open_source" | "proprietary"
+  providerFilter: string
+  storesDataFilter: "all" | "yes" | "no"
+  maxInputPriceFilter: number
+  maxOutputPriceFilter: number
+}
+
 export function generateMockModels(): LLMModel[] {
   const models: LLMModel[] = []
   let idCounter = 1
@@ -87,13 +100,17 @@ export function generateMockModels(): LLMModel[] {
           id: `model-${idCounter++}`,
           name: fullName,
           provider,
+          context_length: [2048, 4096, 8192, 16384, 32768, 128000][Math.floor(Math.random() * 6)],
+          is_open_source: isOpenSource,
+          stores_data: Math.random() > 0.5,
+          pricing_prompt: Number.parseFloat((Math.random() * 0.05 + 0.001).toFixed(4)),
+          pricing_completion: Number.parseFloat((Math.random() * 0.05 + 0.001).toFixed(4)),
           license: isOpenSource ? "Open Source" : "Commercial",
           speedScore: Math.floor(Math.random() * 5) + 1,
           costPer1kTokens: Number.parseFloat((Math.random() * 0.1 + 0.001).toFixed(4)),
           qualityScore: Math.floor(Math.random() * 5) + 1,
           recommended: isRecommended,
           category: Math.random() > 0.8 ? "Code" : Math.random() > 0.6 ? "Multimodal" : "Text",
-          contextLength: [2048, 4096, 8192, 16384, 32768, 128000][Math.floor(Math.random() * 6)],
         })
       })
     })
@@ -109,13 +126,17 @@ export function generateMockModels(): LLMModel[] {
       id: `model-${idCounter++}`,
       name: `${randomProvider} Model ${modelNumber}`,
       provider: randomProvider,
+      context_length: [2048, 4096, 8192, 16384, 32768, 128000][Math.floor(Math.random() * 6)],
+      is_open_source: isOpenSource,
+      stores_data: Math.random() > 0.5,
+      pricing_prompt: Number.parseFloat((Math.random() * 0.05 + 0.001).toFixed(4)),
+      pricing_completion: Number.parseFloat((Math.random() * 0.05 + 0.001).toFixed(4)),
       license: isOpenSource ? "Open Source" : "Commercial",
       speedScore: Math.floor(Math.random() * 5) + 1,
       costPer1kTokens: Number.parseFloat((Math.random() * 0.1 + 0.001).toFixed(4)),
       qualityScore: Math.floor(Math.random() * 5) + 1,
       recommended: Math.random() > 0.95,
       category: ["Text", "Code", "Multimodal", "Embedding"][Math.floor(Math.random() * 4)] as any,
-      contextLength: [2048, 4096, 8192, 16384, 32768, 128000][Math.floor(Math.random() * 6)],
     })
   }
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -15,6 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu"
+import { getUniqueProviders } from "@/lib/models"
 
 interface ModelFiltersProps {
   searchQuery: string
@@ -23,29 +24,26 @@ interface ModelFiltersProps {
   onLicenseChange: (license: string) => void
   providerFilter: string
   onProviderChange: (provider: string) => void
-  maxCostFilter: number
-  onMaxCostChange: (cost: number) => void
+  storesDataFilter: string
+  onStoresDataChange: (storesData: string) => void
+  maxInputPriceFilter: number
+  onMaxInputPriceChange: (price: number) => void
+  maxOutputPriceFilter: number
+  onMaxOutputPriceChange: (price: number) => void
   resultCount: number
   totalCount: number
 }
 
 const LICENSE_OPTIONS = [
   { value: "all", label: "All Licenses" },
-  { value: "Open Source", label: "Open Source" },
-  { value: "Commercial", label: "Commercial" },
+  { value: "open_source", label: "Open Source" },
+  { value: "proprietary", label: "Proprietary" },
 ]
 
-const PROVIDER_OPTIONS = [
-  "OpenAI",
-  "Anthropic",
-  "Google",
-  "Meta",
-  "Mistral AI",
-  "Cohere",
-  "Hugging Face",
-  "Stability AI",
-  "Together AI",
-  "Replicate",
+const STORES_DATA_OPTIONS = [
+  { value: "all", label: "All Models" },
+  { value: "no", label: "Private (No Data Storage)" },
+  { value: "yes", label: "Stores Data" },
 ]
 
 export function ModelFilters({
@@ -55,25 +53,55 @@ export function ModelFilters({
   onLicenseChange,
   providerFilter,
   onProviderChange,
-  maxCostFilter,
-  onMaxCostChange,
+  storesDataFilter,
+  onStoresDataChange,
+  maxInputPriceFilter,
+  onMaxInputPriceChange,
+  maxOutputPriceFilter,
+  onMaxOutputPriceChange,
   resultCount = 0,
   totalCount = 0,
 }: ModelFiltersProps) {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
+  const [providers, setProviders] = useState<string[]>([])
 
-  const activeFiltersCount = [licenseFilter !== "all", providerFilter !== "all", maxCostFilter < 100].filter(
-    Boolean,
-  ).length
+  // Charger les providers depuis Supabase
+  useEffect(() => {
+    const loadProviders = async () => {
+      try {
+        const uniqueProviders = await getUniqueProviders()
+        setProviders(uniqueProviders)
+      } catch (error) {
+        console.error("Failed to load providers:", error)
+      }
+    }
+    loadProviders()
+  }, [])
+
+  const activeFiltersCount = [
+    licenseFilter !== "all",
+    providerFilter !== "all",
+    storesDataFilter !== "all",
+    maxInputPriceFilter < 1,
+    maxOutputPriceFilter < 1,
+  ].filter(Boolean).length
 
   const clearAllFilters = () => {
     onLicenseChange("all")
     onProviderChange("all")
-    onMaxCostChange(100)
+    onStoresDataChange("all")
+    onMaxInputPriceChange(1)
+    onMaxOutputPriceChange(1)
     onSearchChange("")
   }
 
   const hasActiveFilters = searchQuery || activeFiltersCount > 0
+
+  const formatPriceLabel = (value: number) => {
+    if (value >= 1) return `$${value.toFixed(3)}`
+    if (value >= 0.001) return `$${(value * 1000).toFixed(2)}/1K`
+    return `$${(value * 1000000).toFixed(1)}/1M`
+  }
 
   return (
     <div className="space-y-4">
@@ -118,7 +146,7 @@ export function ModelFilters({
 
       {/* Expanded Filters */}
       {isFiltersOpen && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 bg-gray-800/30 rounded-lg border border-gray-700">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6 bg-gray-800/30 rounded-lg border border-gray-700">
           {/* License Filter */}
           <div className="space-y-3">
             <Label className="text-sm font-medium text-gray-300">License Type</Label>
@@ -167,7 +195,7 @@ export function ModelFilters({
                   All Providers
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="bg-gray-700" />
-                {PROVIDER_OPTIONS.map((provider) => (
+                {providers.map((provider) => (
                   <DropdownMenuItem
                     key={provider}
                     onClick={() => onProviderChange(provider)}
@@ -180,22 +208,67 @@ export function ModelFilters({
             </DropdownMenu>
           </div>
 
-          {/* Cost Filter */}
+          {/* Data Privacy Filter */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-gray-300">Data Privacy</Label>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-between border-gray-700 bg-gray-800/50 text-gray-300 hover:bg-gray-700"
+                >
+                  {STORES_DATA_OPTIONS.find((opt) => opt.value === storesDataFilter)?.label}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-full bg-gray-800 border-gray-700">
+                {STORES_DATA_OPTIONS.map((option) => (
+                  <DropdownMenuItem
+                    key={option.value}
+                    onClick={() => onStoresDataChange(option.value)}
+                    className="text-gray-300 hover:bg-gray-700 hover:text-white"
+                  >
+                    {option.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          {/* Input Price Filter */}
           <div className="space-y-3">
             <Label className="text-sm font-medium text-gray-300">
-              Max Cost per 1K tokens: ${(maxCostFilter / 1000).toFixed(4)}
+              Max Input Price: {formatPriceLabel(maxInputPriceFilter)}
             </Label>
             <Slider
-              value={[maxCostFilter]}
-              onValueChange={(value) => onMaxCostChange(value[0])}
-              max={100}
-              min={1}
-              step={1}
+              value={[maxInputPriceFilter]}
+              onValueChange={(value) => onMaxInputPriceChange(value[0])}
+              max={1}
+              min={0.000001}
+              step={0.000001}
               className="w-full"
             />
             <div className="flex justify-between text-xs text-gray-500">
-              <span>$0.001</span>
-              <span>$0.100</span>
+              <span>$0.000001</span>
+              <span>$1.000</span>
+            </div>
+          </div>
+
+          {/* Output Price Filter */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-gray-300">
+              Max Output Price: {formatPriceLabel(maxOutputPriceFilter)}
+            </Label>
+            <Slider
+              value={[maxOutputPriceFilter]}
+              onValueChange={(value) => onMaxOutputPriceChange(value[0])}
+              max={1}
+              min={0.000001}
+              step={0.000001}
+              className="w-full"
+            />
+            <div className="flex justify-between text-xs text-gray-500">
+              <span>$0.000001</span>
+              <span>$1.000</span>
             </div>
           </div>
         </div>

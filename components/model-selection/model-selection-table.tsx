@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ChevronUp, ChevronDown, Star } from "lucide-react"
+import { ChevronUp, ChevronDown, Shield, ShieldOff, Database, ServerOffIcon as DatabaseOff } from "lucide-react"
 import type { LLMModel } from "./model-data"
 
 interface ModelSelectionTableProps {
@@ -48,6 +48,13 @@ export function ModelSelectionTable({
     </Button>
   )
 
+  const formatPrice = (price: number) => {
+    if (price === 0) return "Free"
+    if (price < 0.001) return `$${(price * 1000000).toFixed(2)}/1M`
+    if (price < 1) return `$${(price * 1000).toFixed(3)}/1K`
+    return `$${price.toFixed(4)}/1K`
+  }
+
   return (
     <div className="rounded-lg border border-gray-800 bg-gray-900/50 backdrop-blur-sm">
       <Table>
@@ -73,16 +80,16 @@ export function ModelSelectionTable({
               <SortButton column="provider">Provider</SortButton>
             </TableHead>
             <TableHead>
-              <SortButton column="license">License</SortButton>
+              <SortButton column="is_open_source">License</SortButton>
             </TableHead>
             <TableHead>
-              <SortButton column="speedScore">Speed</SortButton>
+              <SortButton column="stores_data">Data Privacy</SortButton>
             </TableHead>
             <TableHead>
-              <SortButton column="costPer1kTokens">Cost</SortButton>
+              <SortButton column="pricing_prompt">Input Price</SortButton>
             </TableHead>
             <TableHead>
-              <SortButton column="qualityScore">Quality</SortButton>
+              <SortButton column="pricing_completion">Output Price</SortButton>
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -100,50 +107,55 @@ export function ModelSelectionTable({
               <TableCell>
                 <div className="flex items-center gap-2">
                   <span className="font-medium text-white">{model.name}</span>
-                  {model.recommended && (
-                    <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
-                      <Star className="w-3 h-3 mr-1" />
-                      Recommended
-                    </Badge>
-                  )}
                 </div>
               </TableCell>
               <TableCell className="text-gray-300">{model.provider}</TableCell>
               <TableCell>
                 <Badge
-                  variant={model.license === "Open Source" ? "default" : "secondary"}
+                  variant={model.is_open_source ? "default" : "secondary"}
                   className={
-                    model.license === "Open Source"
+                    model.is_open_source
                       ? "bg-green-500/20 text-green-400 border-green-500/30"
                       : "bg-blue-500/20 text-blue-400 border-blue-500/30"
                   }
                 >
-                  {model.license}
+                  {model.is_open_source ? (
+                    <>
+                      <Shield className="w-3 h-3 mr-1" />
+                      Open Source
+                    </>
+                  ) : (
+                    <>
+                      <ShieldOff className="w-3 h-3 mr-1" />
+                      Proprietary
+                    </>
+                  )}
                 </Badge>
               </TableCell>
               <TableCell>
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className={`w-2 h-2 rounded-full ${i < model.speedScore ? "bg-blue-500" : "bg-gray-700"}`}
-                    />
-                  ))}
-                  <span className="ml-2 text-sm text-gray-400">{model.speedScore}/5</span>
-                </div>
+                <Badge
+                  variant={model.stores_data ? "destructive" : "default"}
+                  className={
+                    model.stores_data
+                      ? "bg-red-500/20 text-red-400 border-red-500/30"
+                      : "bg-green-500/20 text-green-400 border-green-500/30"
+                  }
+                >
+                  {model.stores_data ? (
+                    <>
+                      <Database className="w-3 h-3 mr-1" />
+                      Stores Data
+                    </>
+                  ) : (
+                    <>
+                      <DatabaseOff className="w-3 h-3 mr-1" />
+                      Private
+                    </>
+                  )}
+                </Badge>
               </TableCell>
-              <TableCell className="text-gray-300">${model.costPer1kTokens.toFixed(4)}</TableCell>
-              <TableCell>
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className={`w-2 h-2 rounded-full ${i < model.qualityScore ? "bg-green-500" : "bg-gray-700"}`}
-                    />
-                  ))}
-                  <span className="ml-2 text-sm text-gray-400">{model.qualityScore}/5</span>
-                </div>
-              </TableCell>
+              <TableCell className="text-gray-300 font-mono text-sm">{formatPrice(model.pricing_prompt)}</TableCell>
+              <TableCell className="text-gray-300 font-mono text-sm">{formatPrice(model.pricing_completion)}</TableCell>
             </TableRow>
           ))}
         </TableBody>
