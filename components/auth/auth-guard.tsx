@@ -37,11 +37,10 @@ export function AuthGuard({ children }: AuthGuardProps) {
     checkAuth()
   }, [router])
 
-  // Show nothing while checking auth (prevents flash)
+  // Don't render anything while checking auth to avoid flash
   if (isAuthenticated === null) {
     return null
   }
 
-  // Only render children if authenticated
   return isAuthenticated ? <>{children}</> : null
 }

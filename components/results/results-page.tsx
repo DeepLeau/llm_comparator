@@ -352,11 +352,11 @@ export function ResultsPage() {
               </Button>
               <Button
                 size="sm"
-                onClick={() => router.push("/compare")}
+                onClick={() => router.push("/dashboard")}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 <ExternalLink className="w-4 h-4 mr-2" />
-                Advanced Compare
+                Dashboard
               </Button>
             </div>
           </div>

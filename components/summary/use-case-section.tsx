@@ -1,4 +1,4 @@
-import { PenTool } from "lucide-react"
+import { PenTool, Code, BarChart, MessageCircle, Globe, Search } from "lucide-react"
 
 interface UseCase {
   id: string
@@ -7,19 +7,23 @@ interface UseCase {
 }
 
 interface UseCaseSectionProps {
-  useCase: UseCase
+  useCase?: UseCase | null
 }
 
 const useCaseIcons = {
   "content-generation": PenTool,
-  "code-assistance": PenTool,
-  "data-analysis": PenTool,
-  "customer-support": PenTool,
-  translation: PenTool,
-  research: PenTool,
+  "code-assistance": Code,
+  "data-analysis": BarChart,
+  "customer-support": MessageCircle,
+  translation: Globe,
+  research: Search,
 }
 
 export function UseCaseSection({ useCase }: UseCaseSectionProps) {
+  if (!useCase) {
+    return null
+  }
+
   const IconComponent = useCaseIcons[useCase.id as keyof typeof useCaseIcons] || PenTool
 
   return (

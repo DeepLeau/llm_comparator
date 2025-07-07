@@ -1,11 +1,10 @@
-"use client"
-import { ResultsPage as ResultsComponent } from "@/components/results/results-page"
 import { AuthGuard } from "@/components/auth/auth-guard"
+import { SummaryPage } from "@/components/summary/summary-page"
 
-export default function ResultsPage() {
+export default function Summary() {
   return (
     <AuthGuard>
-      <ResultsComponent />
+      <SummaryPage />
     </AuthGuard>
   )
 }
