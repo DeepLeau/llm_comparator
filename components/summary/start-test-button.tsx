@@ -142,7 +142,6 @@ export function StartTestButton() {
           <p>• Total tests: {state.selectedModels.length * state.prompts.length}</p>
           <p>• Sending prompts to selected models</p>
           <p>• Collecting responses in parallel</p>
-          <p>• Scoring each response with Claude 3 Opus</p>
           <p>• Calculating averages per model</p>
           <p>
             This may take {Math.ceil((state.selectedModels.length * state.prompts.length) / 10)} to{" "}

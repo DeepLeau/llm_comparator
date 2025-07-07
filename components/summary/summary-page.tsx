@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { PageHeader } from "@/components/shared/page-header"
 import { ProgressIndicator } from "@/components/use-case-selection/progress-indicator"
@@ -16,6 +16,22 @@ export function SummaryPage() {
   const router = useRouter()
   const { state, setCurrentStep } = useWorkflow()
   const [testResults, setTestResults] = useState<any>(null)
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  // Don't render during SSR to avoid prerendering errors
+  if (!isClient) {
+    return null
+  }
+
+  // Redirect if no data available
+  if (!state?.selectedModels?.length || !state?.prompts?.length) {
+    router.push("/use-case-selection")
+    return null
+  }
 
   const handleBack = () => {
     router.push("/prompt-input")
@@ -59,23 +75,24 @@ export function SummaryPage() {
             <UseCaseSection useCase={state.selectedUseCase} />
 
             {/* Selected Models Section */}
-            <SelectedModelsSection models={state.selectedModels} onEdit={handleEditModels} />
+            <SelectedModelsSection models={state.selectedModels || []} onEdit={handleEditModels} />
 
             {/* Prompts Section */}
-            <PromptsSection prompts={state.prompts} onEdit={handleEditPrompts} />
+            <PromptsSection prompts={state.prompts || []} onEdit={handleEditPrompts} />
 
             {/* Start Test Button */}
             <div className="rounded-lg border border-gray-800 bg-gray-900/50 p-6">
               <h3 className="text-lg font-semibold text-white mb-4">Start Comparison Test</h3>
               <p className="text-gray-400 mb-6">
-                This will test all {state.selectedModels.length} selected models with your {state.prompts.length} prompt
-                {state.prompts.length !== 1 ? "s" : ""} and provide detailed comparison results.
+                This will test all {state.selectedModels?.length || 0} selected models with your{" "}
+                {state.prompts?.length || 0} prompt
+                {(state.prompts?.length || 0) !== 1 ? "s" : ""} and provide detailed comparison results.
               </p>
 
               <StartTestButton
-                selectedModels={state.selectedModels}
-                systemPrompt={state.prompts[0]?.systemPrompt || ""}
-                userPrompt={state.prompts[0]?.userPrompt || ""}
+                selectedModels={state.selectedModels || []}
+                systemPrompt={state.prompts?.[0]?.systemPrompt || ""}
+                userPrompt={state.prompts?.[0]?.userPrompt || ""}
                 onTestComplete={handleTestComplete}
               />
             </div>
