@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   Eye,
-  DollarSign,
+  Zap,
   Calendar,
   Hash,
   Target,
@@ -44,10 +44,8 @@ export function TestHistoryTable({
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
       maximumFractionDigits: 3,
+      minimumFractionDigits: 0,
     }).format(amount)
   }
 
@@ -174,7 +172,7 @@ export function TestHistoryTable({
                   </TableHead>
                   <TableHead className="text-gray-300 font-medium">
                     <div className="flex items-center gap-2">
-                      <DollarSign className="w-4 h-4" />
+                      <Zap className="w-4 h-4" />
                       Cost
                     </div>
                   </TableHead>
@@ -200,7 +198,7 @@ export function TestHistoryTable({
 
                     <TableCell>
                       <div className="flex items-center gap-1 text-white font-medium">
-                        <DollarSign className="w-4 h-4 text-green-500" />
+                        <Zap className="w-4 h-4 text-yellow-500" />
                         {formatCurrency(testRun.total_cost)}
                       </div>
                     </TableCell>

@@ -133,7 +133,7 @@ export function calculateCost(
   pricingPrompt: number,
   pricingCompletion: number,
 ): number {
-  const promptCost = (promptTokens / 1000) * pricingPrompt
-  const completionCost = (completionTokens / 1000) * pricingCompletion
+  const promptCost = (promptTokens) * pricingPrompt
+  const completionCost = (completionTokens) * pricingCompletion
   return Math.round((promptCost + completionCost) * 10000) / 10000
 }

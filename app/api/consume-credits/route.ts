@@ -1,7 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+  },
+})
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,20 +19,21 @@ export async function POST(request: NextRequest) {
     const {
       data: { user },
       error: authError,
-    } = await supabase.auth.getUser(token)
+    } = await supabaseAdmin.auth.getUser(token)
 
     if (authError || !user) {
+      console.error("Auth error:", authError)
       return NextResponse.json({ error: "Invalid token" }, { status: 401 })
     }
 
     const { creditsToConsume } = await request.json()
 
-    if (!creditsToConsume || creditsToConsume < 1) {
+    if (!creditsToConsume || creditsToConsume <= 0) {
       return NextResponse.json({ error: "Invalid credits to consume" }, { status: 400 })
     }
 
-    // Get current credits and update
-    const { data: userData, error: fetchError } = await supabase
+    // Get current credits first
+    const { data: userData, error: fetchError } = await supabaseAdmin
       .from("users")
       .select("credits")
       .eq("id", user.id)
@@ -39,25 +45,24 @@ export async function POST(request: NextRequest) {
     }
 
     const currentCredits = userData?.credits || 0
+    const newCredits = currentCredits - creditsToConsume
 
-    if (currentCredits < creditsToConsume) {
+    if (newCredits < 0) {
       return NextResponse.json({ error: "Insufficient credits" }, { status: 400 })
     }
 
-    const newCredits = currentCredits - creditsToConsume
-
-    // Update user credits
-    const { error: updateError } = await supabase.from("users").update({ credits: newCredits }).eq("id", user.id)
+    // Update user's credits
+    const { error: updateError } = await supabaseAdmin.from("users").update({ credits: newCredits }).eq("id", user.id)
 
     if (updateError) {
-      console.error("Error updating user credits:", updateError)
-      return NextResponse.json({ error: "Failed to update credits" }, { status: 500 })
+      console.error("Error consuming credits:", updateError)
+      return NextResponse.json({ error: "Failed to consume credits" }, { status: 500 })
     }
 
     return NextResponse.json({
       success: true,
-      newCredits,
       creditsConsumed: creditsToConsume,
+      remainingCredits: newCredits,
     })
   } catch (error) {
     console.error("Error in consume-credits:", error)

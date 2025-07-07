@@ -1,5 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { supabase } from "@/lib/supabase"
+import { createClient } from "@supabase/supabase-js"
+
+// Client admin pour les opérations serveur
+const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+  },
+})
 
 interface TestModelRequest {
   selectedModelIds: string[]
@@ -54,6 +63,21 @@ export async function POST(request: NextRequest) {
     const validPrompts = prompts.filter((p) => p && p.trim())
     if (validPrompts.length === 0) {
       return NextResponse.json({ error: "No valid prompts provided" }, { status: 400 })
+    }
+
+    // Récupérer l'utilisateur authentifié pour la sauvegarde
+    let userId: string | null = null
+    try {
+      const authHeader = request.headers.get("authorization")
+      if (authHeader?.startsWith("Bearer ")) {
+        const token = authHeader.split(" ")[1]
+        const {
+          data: { user },
+        } = await supabaseAdmin.auth.getUser(token)
+        userId = user?.id || null
+      }
+    } catch (error) {
+      console.warn("Could not get user from token, continuing without user ID")
     }
 
     // Récupérer les modèles depuis Supabase
@@ -262,7 +286,7 @@ ${item.promptResult!.response}
 Donne une note de 1.0 à 5.0 pour chaque réponse en considérant:
 - Pertinence et précision par rapport à la question
 - Clarté et structure de la réponse
-- Compl��tude et utilité de l'information
+- Complétude et utilité de l'information
 
 Réponds UNIQUEMENT avec les notes séparées par des virgules, dans l'ordre des réponses (ex: 4.1,3.5,4.2,2.8)`
 
@@ -361,8 +385,91 @@ Réponds UNIQUEMENT avec les notes séparées par des virgules, dans l'ordre des
       totalCost: Math.round(results.reduce((sum, r) => sum + r.totalCost, 0) * 100000000) / 100000000,
     }
 
+    // === NOUVELLE SECTION : SAUVEGARDE EN BASE DE DONNÉES ===
+    let testId: string | null = null
+    if (userId && supabaseAdmin) {
+      try {
+        console.log("=== SAVING TO DATABASE ===")
+
+        // 1. Créer l'enregistrement dans la table tests
+        const { data: testData, error: testError } = await supabaseAdmin
+          .from("tests")
+          .insert({
+            user_id: userId,
+            use_case: "general", // Vous pouvez passer ce paramètre depuis le frontend si nécessaire
+            total_cost: successfulPromptTests, // Nombre de crédits consommés (tests réussis)
+          })
+          .select("id")
+          .single()
+
+        if (testError) {
+          console.error("Error creating test record:", testError)
+        } else {
+          testId = testData.id
+          console.log("Created test record with ID:", testId)
+
+          // 2. Créer les enregistrements dans la table prompts
+          const promptInserts = validPrompts.map((prompt) => ({
+            test_id: testId,
+            system_prompt: systemPrompt || "",
+            user_prompt: prompt,
+          }))
+
+          const { data: promptData, error: promptError } = await supabaseAdmin
+            .from("prompts")
+            .insert(promptInserts)
+            .select("id, user_prompt")
+
+          if (promptError) {
+            console.error("Error creating prompt records:", promptError)
+          } else {
+            console.log(`Created ${promptData.length} prompt records`)
+
+            // 3. Créer les enregistrements dans la table results
+            const resultInserts: any[] = []
+
+            results.forEach((modelResult) => {
+              if (!modelResult.error) {
+                modelResult.promptResults.forEach((promptResult) => {
+                  if (!promptResult.error) {
+                    // Trouver l'ID du prompt correspondant
+                    const promptRecord = promptData.find((p) => p.user_prompt === promptResult.prompt)
+                    if (promptRecord) {
+                      resultInserts.push({
+                        test_id: testId,
+                        prompt_id: promptRecord.id,
+                        model_name: modelResult.modelName,
+                        response_time: promptResult.responseTime,
+                        cost: promptResult.cost,
+                        quality_score: promptResult.score,
+                        response_text: promptResult.response,
+                      })
+                    }
+                  }
+                })
+              }
+            })
+
+            if (resultInserts.length > 0) {
+              const { error: resultError } = await supabaseAdmin.from("results").insert(resultInserts)
+
+              if (resultError) {
+                console.error("Error creating result records:", resultError)
+              } else {
+                console.log(`Created ${resultInserts.length} result records`)
+              }
+            }
+          }
+        }
+      } catch (dbError) {
+        console.error("Error saving to database:", dbError)
+        // Continue l'exécution même si la sauvegarde échoue
+      }
+    }
+
     console.log("=== MULTI-PROMPT TEST COMPLETED ===")
     console.log("Stats:", stats)
+    console.log("Test ID:", testId)
     console.log(
       "Results summary:",
       results.map((r) => ({
@@ -383,6 +490,7 @@ Réponds UNIQUEMENT avec les notes séparées par des virgules, dans l'ordre des
       systemPrompt,
       prompts: validPrompts,
       timestamp: new Date().toISOString(),
+      testId, // Retourner l'ID du test créé
     })
   } catch (error) {
     console.error("❌ Error in multi-prompt test-models API:", error)
