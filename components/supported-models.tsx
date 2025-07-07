@@ -94,7 +94,7 @@ export function SupportedModels() {
 
         <div className="text-center mt-12">
           <p className="text-gray-400">
-            <span className="text-purple-400 font-semibold">15+ modèles</span> supportés et en croissance
+            <span className="text-purple-400 font-semibold">300+ models</span> supported and growing
           </p>
         </div>
       </div>

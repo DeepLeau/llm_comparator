@@ -7,7 +7,7 @@ const features = [
   {
     icon: Zap,
     title: "One‑Click Comparison",
-    description: "Test your prompt on 15+ models simultaneously in seconds",
+    description: "Test your prompt on 300+ models simultaneously in seconds",
   },
   {
     icon: FileText,

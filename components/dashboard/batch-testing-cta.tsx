@@ -3,11 +3,11 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Zap, ArrowRight, Upload, Clock, BarChart3 } from "lucide-react"
+import { Zap, ArrowRight, Layers, Clock, BarChart3 } from "lucide-react"
 
 export function BatchTestingCTA() {
   const handleStartBatchTest = () => {
-    window.location.href = "/compare"
+    window.location.href = "/use-case-selection"
   }
 
   const handleLearnMore = () => {
@@ -30,21 +30,21 @@ export function BatchTestingCTA() {
                 <Zap className="w-4 h-4 text-white" />
               </div>
               <Badge variant="secondary" className="bg-purple-600/20 text-purple-300 border-purple-600/30">
-                Pro Feature
+                Launch a New Multi-Model Test
               </Badge>
             </div>
 
             <h3 className="text-2xl font-bold text-white mb-2">Ready for Batch Testing?</h3>
             <p className="text-gray-300 mb-4 max-w-2xl">
-              Upload multiple prompts and test them across dozens of models simultaneously. Perfect for comprehensive
+              Enter multiple prompts and test them across dozens of models simultaneously. Perfect for comprehensive
               evaluations and A/B testing at scale.
             </p>
 
             {/* Features */}
             <div className="flex flex-wrap justify-center lg:justify-start gap-4 mb-6">
               <div className="flex items-center gap-2 text-sm text-gray-400">
-                <Upload className="w-4 h-4 text-blue-400" />
-                CSV Upload
+                <Layers className="w-4 h-4 text-blue-400" />
+                Specific Use Cases
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-400">
                 <Clock className="w-4 h-4 text-green-400" />

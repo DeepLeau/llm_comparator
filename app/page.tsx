@@ -22,7 +22,6 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-black text-white">
       <Hero onTryNow={handleScrollToTest} />
-      <TestZone id="test-zone" />
       <ClaritySection />
       <Features />
       <SupportedModels />

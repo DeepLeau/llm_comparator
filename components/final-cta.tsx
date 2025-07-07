@@ -17,7 +17,7 @@ export function FinalCTA({ onCompareNow }: FinalCTAProps) {
       <div className="max-w-4xl mx-auto text-center relative z-10">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm mb-8">
           <Sparkles className="w-4 h-4 text-purple-400" />
-          <span className="text-sm text-gray-300">Prêt à commencer ?</span>
+          <span className="text-sm text-gray-300">Ready to get started ?</span>
         </div>
 
         <h2 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white via-purple-200 to-blue-200 bg-clip-text text-transparent">
@@ -38,7 +38,7 @@ export function FinalCTA({ onCompareNow }: FinalCTAProps) {
         </Button>
 
         <div className="text-center text-gray-500 mt-8">
-          <p>Free • Beta • No Sign-Up Required</p>
+          <p>Free Version available • Beta</p>
         </div>
       </div>
     </section>

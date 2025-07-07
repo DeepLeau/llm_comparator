@@ -81,7 +81,6 @@ export default function SettingsPage() {
         <div className="space-y-6">
           <SubscriptionPlanSection userProfile={userProfile} />
           <EmailSettingsSection user={user} />
-          <BillingInformationSection userProfile={userProfile} />
           <PasswordManagementSection />
         </div>
       </div>

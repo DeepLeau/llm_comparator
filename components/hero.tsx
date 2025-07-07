@@ -33,7 +33,7 @@ export function Hero({ onTryNow }: HeroProps) {
           className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm mb-8 transition-all duration-1000 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
         >
           <Sparkles className="w-4 h-4 text-purple-400" />
-          <span className="text-sm text-gray-300">Free & Open Source</span>
+          <span className="text-sm text-gray-300">Free Subscription available</span>
         </div>
 
         {/* Main heading */}
@@ -51,7 +51,7 @@ export function Hero({ onTryNow }: HeroProps) {
         <p
           className={`text-xl md:text-2xl text-gray-400 mb-12 max-w-3xl mx-auto leading-relaxed transition-all duration-1000 delay-400 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
         >
-          Test 15+ AI models including GPT-4, Claude, Mistral, LLaMA, Gemini on your business prompts. Get instant
+          Test 300+ AI models including GPT-4, Claude, Mistral, LLaMA, Gemini on your business prompts. Get instant
           comparisons, scoring, and recommendations.
         </p>
 
@@ -86,16 +86,16 @@ export function Hero({ onTryNow }: HeroProps) {
           className={`grid grid-cols-3 gap-8 mt-16 max-w-2xl mx-auto transition-all duration-1000 delay-800 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
         >
           <div className="text-center">
-            <div className="text-3xl font-bold text-white mb-2">15+</div>
+            <div className="text-3xl font-bold text-white mb-2">300+</div>
             <div className="text-gray-400">AI Models</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-white mb-2">50+</div>
+            <div className="text-3xl font-bold text-white mb-2">6+</div>
             <div className="text-gray-400">Use Cases</div>
           </div>
           <div className="text-center">
             <div className="text-3xl font-bold text-white mb-2">100%</div>
-            <div className="text-gray-400">Free</div>
+            <div className="text-gray-400">Free Subscription</div>
           </div>
         </div>
       </div>
