@@ -296,7 +296,7 @@ Réponds UNIQUEMENT avec les notes séparées par des virgules, dans l'ordre des
             method: "POST",
             headers,
             body: JSON.stringify({
-              model: "anthropic/claude-3-opus",
+              model: "deepseek/deepseek-chat-v3-0324:free",
               messages: [{ role: "user", content: scoringPrompt }],
               max_tokens: 100,
               temperature: 0.1,
