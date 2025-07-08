@@ -64,7 +64,7 @@ async function createUserRecord(user: any, supabase: any) {
   console.log("Creating user record with:", { id: user.id, name, plan })
 
   const planCredits = {
-    free: 50,
+    free: 10,
     pro: 500,
     business: 1500,
   }

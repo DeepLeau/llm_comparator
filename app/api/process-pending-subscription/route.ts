@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
 
     // Mettre à jour le plan utilisateur
     const planCredits = {
-      free: 50,
+      free: 10,
       pro: 500,
       business: 1500,
     }

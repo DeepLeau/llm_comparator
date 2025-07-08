@@ -19,7 +19,7 @@ const faqs = [
   {
     question: "Which AI models do you support?",
     answer:
-      "We support 500+ models including GPT-4, Claude, Gemini, Llama, and many more. Our catalog is constantly expanding with the latest models.",
+      "We support 300+ models including GPT-4, Claude, Gemini, Llama, and many more. Our catalog is constantly expanding with the latest models.",
   },
   {
     question: "Can I integrate LLM Comparator with my existing workflow?",
