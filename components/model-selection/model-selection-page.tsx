@@ -11,6 +11,7 @@ import { ModelPagination } from "./model-pagination"
 import { fetchModels } from "@/lib/models"
 import { useWorkflow } from "@/contexts/workflow-context"
 import type { LLMModel } from "./model-data"
+import { supabase } from "@/lib/supabase"
 
 const stepNames = ["Use Case", "Models", "Prompts", "Summary"]
 const MODELS_PER_PAGE = 20
@@ -40,6 +41,32 @@ export function ModelSelectionPage() {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
   const [currentPage, setCurrentPage] = useState(1)
 
+  const [userPlan, setUserPlan] = useState<string | null>(null)
+
+  // Fonction pour récupérer le plan de l'utilisateur
+  const loadUserPlan = async () => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (user) {
+        const { data, error } = await supabase.from("users").select("plan").eq("id", user.id).single()
+
+        if (error) {
+          console.error("Failed to load user plan:", error)
+          setUserPlan("free") // Fallback to free plan
+        } else {
+          setUserPlan(data?.plan || "free")
+        }
+      } else {
+        setUserPlan("free") // Non-authenticated users see free models only
+      }
+    } catch (err) {
+      console.error("Error loading user plan:", err)
+      setUserPlan("free") // Fallback to free plan
+    }
+  }
+
   // Charger les modèles depuis Supabase
   useEffect(() => {
     const loadModels = async () => {
@@ -48,6 +75,9 @@ export function ModelSelectionPage() {
         setError(null)
         const models = await fetchModels()
         setAllModels(models)
+
+        // Charger aussi le plan utilisateur
+        await loadUserPlan()
       } catch (err) {
         console.error("Failed to load models:", err)
         setError("Failed to load models. Please try again.")
@@ -62,6 +92,11 @@ export function ModelSelectionPage() {
   // Filtrage et tri des modèles
   const filteredAndSortedModels = useMemo(() => {
     const filtered = allModels.filter((model) => {
+      // Filtre par plan utilisateur - si l'utilisateur a un plan "free", ne montrer que les modèles gratuits
+      if (userPlan === "free" && model.subscription_plan !== "free") {
+        return false
+      }
+
       // Filtre de recherche
       const matchesSearch =
         !searchQuery ||
@@ -117,6 +152,7 @@ export function ModelSelectionPage() {
     return filtered
   }, [
     allModels,
+    userPlan, // Ajouter userPlan aux dépendances
     searchQuery,
     licenseFilter,
     providerFilter,
@@ -245,6 +281,11 @@ export function ModelSelectionPage() {
             <h1 className="text-3xl font-bold text-white sm:text-4xl">Select Models to Compare</h1>
             <p className="mt-4 text-lg text-gray-400">
               Choose from {allModels.length}+ AI models to find the best fit for your use case
+              {userPlan === "free" && (
+                <span className="block mt-2 text-amber-400">
+                  🆓 Free plan: Showing free models only. Upgrade to access premium models.
+                </span>
+              )}
             </p>
             {state.selectedUseCase && (
               <p className="mt-2 text-blue-400">Selected use case: {state.selectedUseCase.name}</p>

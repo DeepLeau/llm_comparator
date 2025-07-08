@@ -9,6 +9,7 @@ export interface Model {
   stores_data: boolean
   pricing_prompt: number
   pricing_completion: number
+  subscription_plan: string
 }
 
 export interface ModelWithSelection extends Model {

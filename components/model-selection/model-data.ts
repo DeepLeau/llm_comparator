@@ -13,6 +13,7 @@ export interface LLMModel {
   qualityScore: number // 1-5
   recommended: boolean
   category: "Text" | "Code" | "Multimodal" | "Embedding"
+  subscription_plan: string
 }
 
 const providers = [
