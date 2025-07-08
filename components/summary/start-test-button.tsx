@@ -219,6 +219,7 @@ export function StartTestButton() {
             <p>• Credits will be consumed: {creditsRequired}</p>
             <p>• Sending prompts to selected models</p>
             <p>• Collecting responses in parallel</p>
+            <p>• Scoring each response</p>
             <p>• Calculating averages per model</p>
             <p>• Saving results to database</p>
             <p>
