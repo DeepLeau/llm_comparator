@@ -22,9 +22,9 @@ export function ProfileSettingsSection() {
     switch (plan.toLowerCase()) {
       case "free":
         return "secondary"
-      case "pro":
+      case "start":
         return "default"
-      case "business":
+      case "scale":
         return "destructive"
       default:
         return "secondary"
@@ -35,9 +35,9 @@ export function ProfileSettingsSection() {
     switch (plan.toLowerCase()) {
       case "free":
         return "bg-gray-100 text-gray-800"
-      case "pro":
+      case "start":
         return "bg-blue-100 text-blue-800"
-      case "business":
+      case "scale":
         return "bg-purple-100 text-purple-800"
       default:
         return "bg-gray-100 text-gray-800"

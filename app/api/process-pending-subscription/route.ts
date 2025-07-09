@@ -156,9 +156,9 @@ export async function POST(request: NextRequest) {
 
     // Mettre à jour le plan utilisateur
     const planCredits = {
-      free: 10,
-      pro: 500,
-      business: 1500,
+      free: 50,
+      start: 500,
+      scale: 1500,
     }
 
     const newCredits = planCredits[pendingSubscription.plan_type as keyof typeof planCredits] || 0

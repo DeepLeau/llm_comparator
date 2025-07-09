@@ -144,7 +144,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         }
       } else {
         // Pas d'abonnement, mettre à jour manuellement le plan utilisateur
-        const credits = planType === "pro" ? 500 : planType === "business" ? 1500 : 10
+        const credits = planType === "start" ? 500 : planType === "scale" ? 1500 : 50
         console.log("No subscription, updating user plan manually to:", planType, "with credits:", credits)
 
         const { data: userUpdateData, error: userUpdateError } = await supabaseAdmin

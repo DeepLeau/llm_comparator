@@ -59,9 +59,9 @@ export function TopNavigation() {
 
   const getPlanBadgeColor = (plan: string) => {
     switch (plan?.toLowerCase()) {
-      case "pro":
+      case "start":
         return "bg-purple-600/20 text-purple-300 border-purple-600/30"
-      case "business":
+      case "scale":
         return "bg-green-600/20 text-green-300 border-green-600/30"
       default:
         return "bg-blue-600/20 text-blue-300 border-blue-600/30"
