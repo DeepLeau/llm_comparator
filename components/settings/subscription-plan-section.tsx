@@ -27,6 +27,7 @@ interface SubscriptionPlanSectionProps {
 export function SubscriptionPlanSection({ userProfile }: SubscriptionPlanSectionProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [showCancelDialog, setShowCancelDialog] = useState(false)
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false)
 
   const handleManageSubscription = async () => {
     try {
@@ -65,9 +66,47 @@ export function SubscriptionPlanSection({ userProfile }: SubscriptionPlanSection
     }
   }
 
-  const handleUpgrade = () => {
-    // For free users, redirect to pricing page
-    window.location.href = "/pricing"
+  const handleUpgrade = async (planType?: string) => {
+    if (!planType) {
+      // Show upgrade dialog for free users
+      setShowUpgradeDialog(true)
+      return
+    }
+
+    try {
+      setIsLoading(true)
+
+      const { data: sessionData } = await supabase.auth.getSession()
+      const accessToken = sessionData?.session?.access_token
+
+      if (!accessToken) {
+        throw new Error("No access token available")
+      }
+
+      const response = await fetch("/api/create-upgrade-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ plan: planType }),
+      })
+
+      const data = await response.json()
+
+      if (data.error) {
+        throw new Error(data.error)
+      }
+
+      // Redirect to Stripe checkout
+      window.location.href = data.url
+    } catch (error) {
+      console.error("Error creating upgrade session:", error)
+      alert("Unable to create upgrade session. Please try again.")
+    } finally {
+      setIsLoading(false)
+      setShowUpgradeDialog(false)
+    }
   }
 
   const currentPlan = userProfile?.plan || "free"
@@ -171,15 +210,60 @@ export function SubscriptionPlanSection({ userProfile }: SubscriptionPlanSection
             </>
           ) : (
             /* Upgrade for Free Plan */
-            <Button
-              onClick={handleUpgrade}
-              disabled={isLoading}
-              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
-            >
-              <Crown className="w-4 h-4 mr-2" />
-              Upgrade Plan
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
+            <>
+              <Button
+                onClick={() => handleUpgrade()}
+                disabled={isLoading}
+                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
+              >
+                <Crown className="w-4 h-4 mr-2" />
+                Upgrade Plan
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+
+              {/* Upgrade Dialog */}
+              <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
+                <DialogContent className="bg-gray-900 border-gray-800">
+                  <DialogHeader>
+                    <DialogTitle className="text-white">Choose Your Plan</DialogTitle>
+                    <DialogDescription className="text-gray-400">
+                      Select the plan that best fits your needs. You can change or cancel anytime.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-3 mt-6">
+                    <Button
+                      onClick={() => handleUpgrade("start")}
+                      disabled={isLoading}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white justify-between"
+                    >
+                      <div className="flex items-center">
+                        <Zap className="w-4 h-4 mr-2" />
+                        Start Plan
+                      </div>
+                      <span className="text-sm">€29.99/month</span>
+                    </Button>
+                    <Button
+                      onClick={() => handleUpgrade("scale")}
+                      disabled={isLoading}
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white justify-between"
+                    >
+                      <div className="flex items-center">
+                        <Crown className="w-4 h-4 mr-2" />
+                        Scale Plan
+                      </div>
+                      <span className="text-sm">€79.99/month</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowUpgradeDialog(false)}
+                      className="w-full border-gray-600 text-gray-300"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </>
           )}
         </div>
 

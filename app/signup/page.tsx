@@ -10,8 +10,10 @@ import { supabase } from "@/lib/supabase"
 
 const planDetails = {
   free: { name: "Free", credits: 50, icon: Zap, color: "text-blue-400" },
-  start: { name: "Start", credits: 500, icon: Crown, color: "text-purple-400" },
-  scale: { name: "Scale", credits: 1500, icon: Building2, color: "text-green-400" },
+  start: { name: "Start", credits: 1000, icon: Crown, color: "text-purple-400" },
+  scale: { name: "Scale", credits: 5000, icon: Building2, color: "text-green-400" },
+  pro: { name: "Pro", credits: 1000, icon: Crown, color: "text-purple-400" },
+  business: { name: "Business", credits: 5000, icon: Building2, color: "text-green-400" },
 }
 
 function SignUpForm() {
@@ -89,10 +91,8 @@ function SignUpForm() {
     try {
       console.log("Starting signup process with sessionId:", sessionId)
 
-      // Construire l'URL de redirection avec le sessionId si présent
-      const redirectUrl = sessionId
-        ? `${window.location.origin}/auth/callback?session_id=${sessionId}`
-        : `${window.location.origin}/auth/callback`
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin
+      const redirectUrl = sessionId ? `${baseUrl}/auth/callback?session_id=${sessionId}` : `${baseUrl}/auth/callback`
 
       console.log("Redirect URL:", redirectUrl)
 
@@ -188,9 +188,8 @@ function SignUpForm() {
 
   const handleResendEmail = async () => {
     try {
-      const redirectUrl = sessionId
-        ? `${window.location.origin}/auth/callback?session_id=${sessionId}`
-        : `${window.location.origin}/auth/callback`
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin
+      const redirectUrl = sessionId ? `${baseUrl}/auth/callback?session_id=${sessionId}` : `${baseUrl}/auth/callback`
 
       const { error } = await supabase.auth.resend({
         type: "signup",

@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
     const stripeCustomerId = customers[0].stripe_customer_id
     console.log("✅ Using Stripe customer ID:", stripeCustomerId)
 
-    const origin = request.headers.get("origin") || "http://localhost:3000"
+    const origin = request.headers.get("origin") || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
 
     // Create billing portal session for subscription management
     const portalSession = await stripe.billingPortal.sessions.create({
