@@ -104,7 +104,7 @@ export function SubscriptionPlanSection({ userProfile }: SubscriptionPlanSection
             className={
               isFreePlan
                 ? "bg-gray-100 text-gray-800"
-                : currentPlan.toLowerCase() === "pro"
+                : currentPlan.toLowerCase() === "start"
                   ? "bg-blue-100 text-blue-800"
                   : "bg-purple-100 text-purple-800"
             }
@@ -188,7 +188,7 @@ export function SubscriptionPlanSection({ userProfile }: SubscriptionPlanSection
           <p className="text-xs text-blue-300">
             {isFreePlan ? (
               <span>
-                <strong>Upgrade:</strong> Choose from our Pro or Business plans to unlock advanced features and higher
+                <strong>Upgrade:</strong> Choose from our Start or Scale plans to unlock advanced features and higher
                 credit limits.
               </span>
             ) : (

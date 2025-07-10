@@ -47,7 +47,7 @@ export function ProfileSettingsSection() {
   // Mock user data
   const userData = {
     email: "john.doe@example.com",
-    plan: "Pro",
+    plan: "start",
   }
 
   return (

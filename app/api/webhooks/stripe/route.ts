@@ -77,7 +77,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     })
 
     const userId = session.metadata?.user_id
-    const planType = session.metadata?.plan_type || "pro"
+    const planType = session.metadata?.plan_type || "start"
     const billingPeriod = session.metadata?.billing_period || "monthly"
     const customerId =
           typeof session.customer === "string"

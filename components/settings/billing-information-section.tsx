@@ -23,7 +23,7 @@ export function BillingInformationSection({ userProfile }: BillingInformationSec
   // Mock billing data - in a real app, this would come from your backend
   const billingInfo = {
     nextBillingDate: "2024-02-15",
-    amount: currentPlan.toLowerCase() === "pro" ? "$29.00" : "$99.00",
+    amount: currentPlan.toLowerCase() === "start" ? "$29.00" : "$99.00",
     paymentMethod: "**** **** **** 4242",
     invoices: [
       { id: "inv_001", date: "2024-01-15", amount: "$29.00", status: "paid" },

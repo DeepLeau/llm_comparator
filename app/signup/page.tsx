@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, Suspense } from "react"
+import { useState, Suspense, useEffect } from "react"
 import { Eye, EyeOff, Zap, Sparkles, ArrowLeft, Crown, Building2, Mail, CheckCircle } from "lucide-react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -34,6 +34,35 @@ function SignUpForm() {
   const [error, setError] = useState("")
   const [showEmailVerification, setShowEmailVerification] = useState(false)
   const [userEmail, setUserEmail] = useState("")
+
+  // Auto-remplir l'email si on vient d'un paiement Stripe
+  useEffect(() => {
+    if (paymentSuccess && !formData.email) {
+      // Essayer de récupérer l'email depuis les pending subscriptions
+      const fetchPendingSubscription = async () => {
+        try {
+          const response = await fetch("/api/get-pending-subscription", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sessionId }),
+          })
+
+          if (response.ok) {
+            const data = await response.json()
+            if (data.email) {
+              setFormData((prev) => ({ ...prev, email: data.email, name: data.name || "" }))
+            }
+          }
+        } catch (error) {
+          console.log("Could not fetch pending subscription data")
+        }
+      }
+
+      if (sessionId) {
+        fetchPendingSubscription()
+      }
+    }
+  }, [paymentSuccess, sessionId, formData.email])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
@@ -302,7 +331,9 @@ function SignUpForm() {
               <Sparkles className="w-3 h-3 mr-1" />
               Secure Platform
             </div>
-            <p className="text-gray-400">Create your account to start comparing AI models</p>
+            <p className="text-gray-400">
+              {paymentSuccess ? "Complete your account setup" : "Create your account to start comparing AI models"}
+            </p>
           </div>
 
           {/* Selected Plan Display */}
@@ -318,6 +349,21 @@ function SignUpForm() {
                 </div>
               </div>
               {paymentSuccess && <div className="mt-2 text-sm text-green-400">✓ Payment successful</div>}
+            </div>
+          )}
+
+          {/* Payment Success Message */}
+          {paymentSuccess && (
+            <div className="mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="w-5 h-5 text-green-400" />
+                <div>
+                  <p className="text-sm text-green-300 font-medium">Payment Successful!</p>
+                  <p className="text-xs text-green-400 mt-1">
+                    Complete your account setup to activate your subscription.
+                  </p>
+                </div>
+              </div>
             </div>
           )}
 
@@ -449,8 +495,10 @@ function SignUpForm() {
               {isLoading ? (
                 <div className="flex items-center justify-center">
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                  Creating account...
+                  {paymentSuccess ? "Activating Account..." : "Creating account..."}
                 </div>
+              ) : paymentSuccess ? (
+                "Activate Account"
               ) : (
                 "Create Account"
               )}
@@ -461,7 +509,10 @@ function SignUpForm() {
           <div className="mt-8 pt-6 border-t border-white/10 text-center">
             <p className="text-gray-400">
               Already have an account?{" "}
-              <Link href="/login" className="text-purple-400 hover:text-purple-300 transition-colors font-medium">
+              <Link
+                href={sessionId ? `/login?session_id=${sessionId}` : "/login"}
+                className="text-purple-400 hover:text-purple-300 transition-colors font-medium"
+              >
                 Sign in
               </Link>
             </p>

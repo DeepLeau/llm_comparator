@@ -34,8 +34,8 @@ export async function GET(request: NextRequest) {
       }
 
       // Traiter l'abonnement si sessionId présent
-      if (sessionId && data.user) {
-        return await processSubscriptionAndRedirect(requestUrl, sessionId, request)
+      if (sessionId && data.user && data.session) {
+        return await processSubscriptionAndRedirect(requestUrl, sessionId, data.session.access_token)
       }
 
       return NextResponse.redirect(`${requestUrl.origin}/dashboard?welcome=true`)
@@ -66,14 +66,14 @@ async function createUserRecord(user: any, supabase: any) {
   const planCredits = {
     free: 50,
     start: 500,
-    scale: 1500,
+    scale: 2500,
   }
 
   const { error: insertError } = await supabase.from("users").insert({
     id: user.id,
     name: name,
     plan: plan,
-    credits: planCredits[plan as keyof typeof planCredits] || 0,
+    credits: planCredits[plan as keyof typeof planCredits] || 50,
   })
 
   if (insertError) {
@@ -83,7 +83,7 @@ async function createUserRecord(user: any, supabase: any) {
   }
 }
 
-async function processSubscriptionAndRedirect(requestUrl: URL, sessionId: string, request: NextRequest) {
+async function processSubscriptionAndRedirect(requestUrl: URL, sessionId: string, accessToken: string) {
   console.log("🔄 Processing pending subscription...")
   console.log("Session ID to process:", sessionId)
 
@@ -92,7 +92,7 @@ async function processSubscriptionAndRedirect(requestUrl: URL, sessionId: string
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Cookie: request.headers.get("cookie") || "",
+        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify({ sessionId }),
     })
