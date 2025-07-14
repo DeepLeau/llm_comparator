@@ -78,7 +78,7 @@ export function SolutionShowcase() {
           <p
             className={`text-xl md:text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed mb-12 transition-all duration-1000 delay-400 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
           >
-            LLM Comparator eliminates the guesswork with{" "}
+            WhichLLMs eliminates the guesswork with{" "}
             <span className="text-blue-400 font-semibold animate-pulse">real-time testing</span>,{" "}
             <span className="text-violet-400 font-semibold animate-pulse">intelligent analysis</span>, and{" "}
             <span className="text-blue-300 font-semibold animate-pulse">actionable recommendations</span>.
@@ -147,7 +147,7 @@ export function SolutionShowcase() {
               <div className="w-8 h-8 bg-red-500/20 rounded-lg flex items-center justify-center">
                 <span className="text-red-400 font-bold">✗</span>
               </div>
-              <h3 className="text-2xl font-bold text-red-300">Before LLM Comparator</h3>
+              <h3 className="text-2xl font-bold text-red-300">Before WhichLLMs</h3>
             </div>
             <ul className="space-y-4">
               {[
@@ -176,7 +176,7 @@ export function SolutionShowcase() {
               <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
                 <CheckCircle className="w-5 h-5 text-blue-400" />
               </div>
-              <h3 className="text-2xl font-bold text-blue-300">With LLM Comparator</h3>
+              <h3 className="text-2xl font-bold text-blue-300">With WhichLLMs</h3>
             </div>
             <ul className="space-y-4">
               {[

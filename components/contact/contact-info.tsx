@@ -77,7 +77,7 @@ export function ContactInfo() {
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            <p className="text-white font-medium">LLM Comparator HQ</p>
+            <p className="text-white font-medium">WhichLLMs HQ</p>
             <p className="text-gray-400">123 AI Street</p>
             <p className="text-gray-400">San Francisco, CA 94105</p>
             <p className="text-gray-400">United States</p>

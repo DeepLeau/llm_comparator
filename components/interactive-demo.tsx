@@ -95,7 +95,7 @@ export function InteractiveDemo() {
           <p
             className={`text-xl md:text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed transition-all duration-1000 delay-400 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
           >
-            Watch how LLM Comparator analyzes your prompt across 300+ models and delivers instant recommendations.
+            Watch how WhichLLMs analyzes your prompt across 300+ models and delivers instant recommendations.
           </p>
         </div>
 

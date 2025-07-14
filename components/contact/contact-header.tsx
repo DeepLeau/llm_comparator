@@ -14,7 +14,7 @@ export function ContactHeader() {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
               <img src="/placeholder.svg?height=32&width=32" alt="Logo" className="w-8 h-8 rounded" />
-              <span className="hidden sm:block text-lg font-semibold text-white">LLM Comparator</span>
+              <span className="hidden sm:block text-lg font-semibold text-white">WhichLLMs</span>
             </div>
             <Button
               variant="ghost"

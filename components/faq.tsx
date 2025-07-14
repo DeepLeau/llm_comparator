@@ -6,7 +6,7 @@ import { ChevronDown, HelpCircle, Sparkles } from "lucide-react"
 
 const faqs = [
   {
-    question: "How does LLM Comparator work?",
+    question: "How does WhichLLMs work?",
     answer:
       "Choose a use case template, select the AI models, and enter your prompts. Our platform runs the tests and delivers results with smart recommendations based on quality, speed, and cost and with filters for open-source models, data storage, pricing, and more.",
   },
@@ -82,7 +82,7 @@ export function FAQ() {
           <p
             className={`text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed transition-all duration-1000 delay-400 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
           >
-            Everything you need to know about LLM Comparator.
+            Everything you need to know about WhichLLMs.
           </p>
         </div>
 

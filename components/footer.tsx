@@ -19,7 +19,7 @@ export function Footer() {
               </div>
               <div>
                 <span className="text-white font-bold text-xl group-hover:text-blue-300 transition-colors">
-                  LLM Comparator
+                  WhichLLMs
                 </span>
                 <div className="flex items-center gap-1 mt-1">
                   <Sparkles className="w-3 h-3 text-blue-400 animate-pulse" />
@@ -111,7 +111,7 @@ export function Footer() {
         </div>
 
         <div className="text-center mt-8">
-          <p className="text-gray-500 text-sm">© 2025 LLM Comparator. All rights reserved.</p>
+          <p className="text-gray-500 text-sm">© 2025 WhichLLMs. All rights reserved.</p>
         </div>
       </div>
     </footer>

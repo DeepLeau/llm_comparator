@@ -9,7 +9,7 @@ const testimonials = [
     name: "Sarah Chen",
     role: "AI Engineer at Stripe",
     content:
-      "LLM Comparator saved us 3 weeks of research. We found the perfect model for our customer support bot in minutes.",
+      "WhichLLMs saved us 3 weeks of research. We found the perfect model for our customer support bot in minutes.",
     rating: 5,
     avatar: "SC",
     company: "Stripe",

@@ -26,7 +26,7 @@ export function Header() {
             </div>
             <div>
               <span className="text-white/90 font-bold text-lg group-hover:text-blue-300 transition-colors">
-                LLM Comparator
+                WhichLLMs
               </span>
               <div className="flex items-center gap-1">
                 <Sparkles className="w-3 h-3 text-blue-400/80 animate-pulse" />

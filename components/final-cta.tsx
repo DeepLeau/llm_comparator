@@ -32,7 +32,7 @@ export function FinalCTA() {
 
         <p className="text-xl md:text-2xl text-slate-300 mb-12 max-w-3xl mx-auto leading-relaxed">
           Join <span className="text-purple-400 font-semibold">10,000+ developers</span>, agencies, and startups using
-          LLM Comparator to optimize their AI projects.
+          WhichLLMs to optimize their AI projects.
         </p>
 
         <Button

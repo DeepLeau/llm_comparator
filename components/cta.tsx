@@ -31,7 +31,7 @@ export function CTA() {
           </h2>
 
           <p className="text-xl text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed">
-            Join thousands of developers, agencies, and startups who trust LLM Comparator to find the perfect AI model
+            Join thousands of developers, agencies, and startups who trust WhichLLMs to find the perfect AI model
             for their projects.
           </p>
 

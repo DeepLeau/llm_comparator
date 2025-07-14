@@ -140,7 +140,7 @@ function LoginForm() {
               <img src="/logo.png" alt="Logo" className="rounded" />
             </div>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent mb-2">
-              LLM Comparator
+              WhichLLMs
             </h1>
             <div className="inline-flex items-center px-3 py-1 bg-white/10 rounded-full text-xs text-gray-300 mb-4">
               <Sparkles className="w-3 h-3 mr-1" />
@@ -267,7 +267,7 @@ function LoginForm() {
 
         {/* Footer */}
         <div className="text-center mt-8">
-          <p className="text-gray-500 text-sm">© 2024 LLM Comparator. All rights reserved.</p>
+          <p className="text-gray-500 text-sm">© 2025 WhichLLMs. All rights reserved.</p>
         </div>
       </div>
     </div>

@@ -7,7 +7,7 @@ import { useState } from "react"
 
 const faqs = [
   {
-    question: "How quickly can I get started with LLM Comparator?",
+    question: "How quickly can I get started with WhichLLMs?",
     answer:
       "You can start comparing models immediately with our free tier. Simply sign up, select your models, and begin testing. No setup required!",
   },
@@ -22,7 +22,7 @@ const faqs = [
       "We support 300+ models including GPT-4, Claude, Gemini, Llama, and many more. Our catalog is constantly expanding with the latest models.",
   },
   {
-    question: "Can I integrate LLM Comparator with my existing workflow?",
+    question: "Can I integrate WhichLLMs with my existing workflow?",
     answer:
       "We offer REST APIs, webhooks, and integrations with popular tools. Our documentation provides detailed integration guides.",
   },
