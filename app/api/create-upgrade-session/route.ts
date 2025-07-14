@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Déterminer le price_id selon le plan
-    const priceId = plan === "start" ? "price_1RixTrGffKn97RRDKSYDuywj" : "price_1RixEiGffKn97RRDrqTLy46a"
+    const priceId = plan === "start" ? "price_1Rkq0iGffKn97RRDLsMgyf5b" : "price_1Rkq0mGffKn97RRDPnQzD0v1"
 
     // Créer la session Stripe
     const session = await stripe.checkout.sessions.create({

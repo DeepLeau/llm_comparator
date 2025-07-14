@@ -1,7 +1,7 @@
 // Stripe Price IDs - remplace par tes vrais IDs depuis ton dashboard Stripe
 export const STRIPE_PRICE_IDS = {
-  start: "price_1RixTrGffKn97RRDKSYDuywj", // Remplace par ton vrai Price ID
-  scale: "price_1RixEiGffKn97RRDrqTLy46a", // Remplace par ton vrai Price ID
+  start: "price_1Rkq0iGffKn97RRDLsMgyf5b", // Remplace par ton vrai Price ID
+  scale: "price_1Rkq0mGffKn97RRDPnQzD0v1", // Remplace par ton vrai Price ID
 }
 
 // Types pour TypeScript

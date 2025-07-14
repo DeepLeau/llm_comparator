@@ -84,7 +84,7 @@ const plans: PricingPlan[] = [
     testLimit: "500 scorings/month",
     modelAccess: "All models including premium",
     credits: 500,
-    stripePriceId: "price_1RixTrGffKn97RRDKSYDuywj",
+    stripePriceId: "price_1Rkq0iGffKn97RRDLsMgyf5b",
     features: [
       { text: "500 scorings", included: true, icon: Zap, highlight: true },
       { text: "Manual trigger", included: true, icon: Shield },
@@ -111,7 +111,7 @@ const plans: PricingPlan[] = [
     testLimit: "1,500 scorings/month",
     modelAccess: "All models + extended history",
     credits: 1500,
-    stripePriceId: "price_1RixEiGffKn97RRDrqTLy46a",
+    stripePriceId: "price_1Rkq0mGffKn97RRDPnQzD0v1",
     features: [
       { text: "1,500 scorings", included: true, icon: Zap, highlight: true },
       { text: "Manual trigger", included: true, icon: Shield },

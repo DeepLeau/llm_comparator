@@ -17,8 +17,8 @@ const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, proces
 
 // Configuration des prix Stripe
 const STRIPE_PRICE_IDS = {
-  start: "price_1RixTrGffKn97RRDKSYDuywj",
-  scale: "price_1RixEiGffKn97RRDrqTLy46a",
+  start: "price_1Rkq0iGffKn97RRDLsMgyf5b",
+  scale: "price_1Rkq0mGffKn97RRDPnQzD0v1",
 }
 
 export async function POST(request: NextRequest) {
