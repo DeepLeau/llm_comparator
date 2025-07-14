@@ -16,7 +16,7 @@ export function PageHeader({ title, onBack, estimatedCost }: PageHeaderProps) {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
-              <img src="/placeholder.svg?height=32&width=32" alt="Logo" className="w-8 h-8 rounded" />
+              <img src="/logo.png?height=32&width=32" alt="Logo" className="w-8 h-8 rounded" />
               <span className="hidden sm:block text-lg font-semibold text-white">LLM Comparator</span>
             </div>
             <Button variant="ghost" onClick={onBack} className="text-gray-300 hover:text-white hover:bg-gray-800">

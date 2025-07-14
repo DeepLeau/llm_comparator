@@ -8,7 +8,7 @@ export default function ContactPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
-              <img src="/placeholder.svg?height=32&width=32" alt="Logo" className="w-8 h-8 rounded" />
+              <img src="/logo.png?height=32&width=32" alt="Logo" className="w-8 h-8 rounded" />
               <span className="text-lg font-semibold text-white">LLM Comparator</span>
             </div>
             <a href="/" className="text-gray-400 hover:text-white transition-colors">

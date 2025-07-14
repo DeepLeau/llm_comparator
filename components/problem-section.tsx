@@ -21,10 +21,10 @@ const problems = [
   },
   {
     icon: TrendingDown,
-    title: "Poor Performance",
-    description: "85% of AI projects fail due to suboptimal model selection",
-    stat: "85%",
-    impact: "Projects Failed",
+    title: "Bad First Impressions",
+    description: "A slow or inaccurate AI assistant can cut conversions by up to 27%",
+    stat: "-27%",
+    impact: "Conversion Drop",
   },
 ]
 

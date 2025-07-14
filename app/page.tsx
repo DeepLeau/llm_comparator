@@ -1,5 +1,6 @@
 "use client"
 
+import { Header } from "@/components/header"
 import { Hero } from "@/components/hero"
 import { ProblemSection } from "@/components/problem-section"
 import { SolutionShowcase } from "@/components/solution-showcase"
@@ -19,14 +20,19 @@ export default function Home() {
       </div>
 
       <div className="relative z-10">
-        <Hero />
-        <ProblemSection />
-        <SolutionShowcase />
-        <InteractiveDemo />
-        <SocialProof />
-        <FAQ />
-        <Footer />
+        <Header />
+        <div className="pt-20">
+          {" "}
+          {/* Padding pour compenser le header fixe */}
+          <Hero />
+          <ProblemSection />
+          <SolutionShowcase />
+          <InteractiveDemo />
+          <FAQ />
+          <Footer />
+        </div>
       </div>
     </main>
   )
 }
+

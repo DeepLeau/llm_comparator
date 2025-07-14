@@ -211,10 +211,12 @@ export function InteractiveDemo() {
               </div>
 
               <div className="mt-6 p-4 bg-gradient-to-r from-blue-500/10 to-violet-500/10 rounded-xl border border-blue-500/20 animate-fade-in animation-delay-500">
-                <p className="text-blue-300 font-medium flex items-center gap-2">
-                  <Brain className="w-5 h-5 animate-pulse" />
-                  <strong>AI Recommendation:</strong> GPT-4 is optimal for this professional communication task due to
-                  its superior tone and structure capabilities.
+                <p className="text-blue-300 text-sm font-medium flex items-start gap-2 leading-relaxed">
+                  <Brain className="w-4 h-4 mt-0.5 animate-pulse flex-shrink-0" />
+                  <span>
+                    <strong className="text-blue-200">AI Recommendation:</strong> GPT-4 is optimal for this professional
+                    communication task due to its superior tone and structure capabilities.
+                  </span>
                 </p>
               </div>
             </Card>

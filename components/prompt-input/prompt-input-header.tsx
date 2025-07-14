@@ -16,8 +16,8 @@ export function PromptInputHeader({ estimatedCost, onBack }: PromptInputHeaderPr
           <div className="flex items-center gap-6">
             {/* Logo placeholder */}
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">LC</span>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center">
+                <img src="/logo.png" alt="Logo" className="rounded" />
               </div>
               <span className="text-white font-semibold text-lg hidden sm:block">LLM Comparator</span>
             </div>

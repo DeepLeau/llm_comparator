@@ -8,7 +8,7 @@ const faqs = [
   {
     question: "How does LLM Comparator work?",
     answer:
-      "Simply input your prompt, and our platform tests it across 300+ AI models simultaneously. Our AI analyzes the results and provides recommendations based on quality, speed, and cost.",
+      "Choose a use case template, select the AI models, and enter your prompts. Our platform runs the tests and delivers results with smart recommendations based on quality, speed, and cost and with filters for open-source models, data storage, pricing, and more.",
   },
   {
     question: "Which AI models do you support?",
@@ -16,14 +16,9 @@ const faqs = [
       "We support 300+ models including GPT-4, Claude 3, Gemini, Mistral, LLaMA, PaLM, Cohere, and many more. We're constantly adding new models as they become available.",
   },
   {
-    question: "Is there a free plan?",
+    question: "Is there a free trial?",
     answer:
-      "Yes! Our free plan includes 10 comparisons per month with access to 50+ models. Perfect for trying out the platform and small projects.",
-  },
-  {
-    question: "How accurate are the recommendations?",
-    answer:
-      "Our AI recommendation engine has a 94% accuracy rate based on user feedback. It considers multiple factors including output quality, response time, and cost-effectiveness.",
+      "Yes! Our free trial includes 10 comparisons for 7 days with access to 50+ models. Perfect for trying out the platform and small projects.",
   },
   {
     question: "Can I integrate this with my existing workflow?",
@@ -33,7 +28,7 @@ const faqs = [
   {
     question: "What kind of support do you provide?",
     answer:
-      "Free users get community support, Pro users get priority email support, and Enterprise customers get dedicated support with SLA guarantees.",
+      "Free users get standard support, Pro users get priority email support, and Enterprise customers get dedicated support with SLA guarantees.",
   },
 ]
 

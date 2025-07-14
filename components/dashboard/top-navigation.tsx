@@ -74,8 +74,8 @@ export function TopNavigation() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center">
-              <Zap className="w-5 h-5 text-white" />
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center">
+              <img src="/logo.png" alt="Logo" className="rounded" />
             </div>
             <span className="text-xl font-bold text-white">LLM Comparator</span>
           </div>

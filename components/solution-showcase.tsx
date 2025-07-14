@@ -9,7 +9,7 @@ const solutions = [
   {
     icon: Zap,
     title: "Instant Comparison",
-    description: "Test 300+ models simultaneously in under 10 seconds",
+    description: "Test 300+ models simultaneously in seconds",
     benefit: "Save 40+ hours of research",
     color: "from-blue-500 to-cyan-500",
   },
@@ -22,9 +22,9 @@ const solutions = [
   },
   {
     icon: Shield,
-    title: "Real Performance Data",
-    description: "Actual benchmarks, not marketing claims or biased reviews",
-    benefit: "Make data-driven decisions",
+    title: "Real-Time Benchmarks",
+    description: "Up-to-date model tests, not marketing hype or outdated reviews",
+    benefit: "Decide with facts, not fiction",
     color: "from-blue-600 to-violet-600",
   },
 ]
@@ -155,6 +155,7 @@ export function SolutionShowcase() {
                 "Read biased marketing materials",
                 "Make expensive wrong choices",
                 "Waste time on trial and error",
+                "Constantly track new models & updates",
               ].map((item, index) => (
                 <li
                   key={index}
@@ -179,10 +180,11 @@ export function SolutionShowcase() {
             </div>
             <ul className="space-y-4">
               {[
-                "Get results in 10 seconds",
+                "Get results in seconds",
                 "See real performance data",
                 "Make confident decisions",
                 "Start building immediately",
+                "Always up-to-date, we add the latest models for you",
               ].map((item, index) => (
                 <li
                   key={index}

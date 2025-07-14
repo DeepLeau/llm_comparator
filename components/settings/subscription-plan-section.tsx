@@ -240,7 +240,7 @@ export function SubscriptionPlanSection({ userProfile }: SubscriptionPlanSection
                         <Zap className="w-4 h-4 mr-2" />
                         Start Plan
                       </div>
-                      <span className="text-sm">€29.99/month</span>
+                      <span className="text-sm">$29.99/month</span>
                     </Button>
                     <Button
                       onClick={() => handleUpgrade("scale")}
@@ -251,7 +251,7 @@ export function SubscriptionPlanSection({ userProfile }: SubscriptionPlanSection
                         <Crown className="w-4 h-4 mr-2" />
                         Scale Plan
                       </div>
-                      <span className="text-sm">€79.99/month</span>
+                      <span className="text-sm">$79.99/month</span>
                     </Button>
                     <Button
                       variant="outline"
