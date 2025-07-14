@@ -18,6 +18,7 @@ import {
   TestTube,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 
 interface PricingPlan {
   id: string
@@ -158,43 +159,67 @@ const plans: PricingPlan[] = [
 
 export function PricingPlans() {
   const router = useRouter()
+  const [isVisible, setIsVisible] = useState(false)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+        }
+      },
+      { threshold: 0.1 },
+    )
+
+    const section = document.getElementById("pricing-plans")
+    if (section) observer.observe(section)
+
+    return () => observer.disconnect()
+  }, [])
 
   const getAccentClasses = (color: string) => {
     switch (color) {
       case "blue":
         return {
-          border: "border-blue-500/30",
-          button: "border-blue-500/50 text-blue-300 hover:bg-blue-500/10",
+          border: "border-blue-500/30 hover:border-blue-400/50",
+          button: "border-blue-500/50 text-blue-300 hover:bg-blue-500/10 hover:border-blue-400/70",
           icon: "text-blue-400",
-          badge: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+          badge: "bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-300 border-blue-500/30",
+          glow: "hover:shadow-blue-500/20",
         }
       case "green":
         return {
-          border: "border-green-500/30",
-          button: "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700",
+          border: "border-green-500/30 hover:border-green-400/50",
+          button:
+            "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 shadow-lg shadow-green-500/25",
           icon: "text-green-400",
-          badge: "bg-green-500/20 text-green-300 border-green-500/30",
+          badge: "bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-300 border-green-500/30",
+          glow: "hover:shadow-green-500/20",
         }
       case "yellow":
         return {
-          border: "border-yellow-500/30",
-          button: "bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700",
+          border: "border-yellow-500/30 hover:border-yellow-400/50",
+          button:
+            "bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 shadow-lg shadow-yellow-500/25",
           icon: "text-yellow-400",
-          badge: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30",
+          badge: "bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-yellow-300 border-yellow-500/30",
+          glow: "hover:shadow-yellow-500/20",
         }
       case "purple":
         return {
-          border: "border-purple-500/30",
-          button: "border-purple-500/50 text-purple-300 hover:bg-purple-500/10",
+          border: "border-purple-500/30 hover:border-purple-400/50",
+          button: "border-purple-500/50 text-purple-300 hover:bg-purple-500/10 hover:border-purple-400/70",
           icon: "text-purple-400",
-          badge: "bg-purple-500/20 text-purple-300 border-purple-500/30",
+          badge: "bg-gradient-to-r from-purple-500/20 to-violet-500/20 text-purple-300 border-purple-500/30",
+          glow: "hover:shadow-purple-500/20",
         }
       default:
         return {
-          border: "border-white/20",
+          border: "border-white/20 hover:border-white/30",
           button: "border-white/20 text-white hover:bg-white/10",
           icon: "text-white",
           badge: "bg-white/20 text-white border-white/30",
+          glow: "hover:shadow-white/10",
         }
     }
   }
@@ -205,7 +230,6 @@ export function PricingPlans() {
     } else if (plan.id === "enterprise") {
       window.location.href = "/contact?type=enterprise"
     } else if (plan.stripePriceId) {
-      // Redirect to Stripe Checkout for paid plans
       try {
         const response = await fetch("/api/create-checkout-session", {
           method: "POST",
@@ -228,138 +252,173 @@ export function PricingPlans() {
           window.location.href = url
         } else {
           console.error("No checkout URL received")
-          // Fallback: redirect to signup with plan info
           router.push(`/signup?plan=${plan.id}`)
         }
       } catch (error) {
         console.error("Error creating checkout session:", error)
-        // Fallback: redirect to signup with plan info
         router.push(`/signup?plan=${plan.id}`)
       }
     }
   }
 
   return (
-    <div className="mb-20">
-      <div className="grid lg:grid-cols-2 xl:grid-cols-4 gap-8 max-w-7xl mx-auto">
-        {plans.map((plan) => {
-          const accentClasses = getAccentClasses(plan.accentColor)
-          const isScale = plan.id === "scale"
+    <div id="pricing-plans" className="mb-20">
+      {/* Container avec espace pour le badge qui saute */}
+      <div className="pt-8 pb-4">
+        <div className="grid lg:grid-cols-2 xl:grid-cols-4 gap-8 max-w-7xl mx-auto">
+          {plans.map((plan, index) => {
+            const accentClasses = getAccentClasses(plan.accentColor)
+            const isScale = plan.id === "scale"
 
-          return (
-            <Card
-              key={plan.id}
-              className={`relative p-8 bg-gradient-to-br ${plan.bgGradient} via-white/5 to-transparent border-white/10 backdrop-blur-sm hover:border-white/20 transition-all duration-300 ${
-                isScale ? "scale-105 shadow-2xl shadow-yellow-500/10 ring-2 ring-yellow-500/20" : "hover:scale-105"
-              } ${accentClasses.border}`}
-            >
-              {/* Popular Badge */}
-              {plan.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <Badge className={`px-4 py-1 ${accentClasses.badge}`}>⭐ Most Popular</Badge>
-                </div>
-              )}
-
-              {/* Plan Header */}
-              <div className="text-center mb-8">
-                {/* Plan Name with Emoji - No Icon Container */}
-                <div className="flex items-center justify-center gap-2 mb-4">
-                  <h3 className="text-2xl font-bold text-white">{plan.name}</h3>
-                  <span className="text-2xl">{plan.emoji}</span>
-                </div>
-                <p className="text-gray-400 text-sm mb-4">{plan.description}</p>
-                <div className="mb-6">
-                  <div className="flex items-baseline justify-center gap-1">
-                    <span className="text-4xl font-bold text-white">{plan.price}</span>
-                    <span className="text-gray-400 text-lg">{plan.priceDetail}</span>
+            return (
+              <div key={plan.id} className="relative">
+                {/* Popular Badge - Positionné au-dessus de la card */}
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-50">
+                    <Badge
+                      className={`px-4 py-2 bg-gradient-to-r from-yellow-500/95 to-orange-500/95 text-white border-2 border-yellow-400/60 backdrop-blur-xl shadow-2xl shadow-yellow-500/40 animate-bounce font-semibold whitespace-nowrap`}
+                    >
+                      <Star className="w-4 h-4 mr-1 text-yellow-200 animate-spin-slow" />
+                      Most Popular
+                    </Badge>
                   </div>
-                </div>
-                {/* Key Metrics */}
-                <div className="space-y-2 mb-6 p-4 bg-white/5 rounded-lg">
-                  <div className="text-sm text-gray-300">
-                    <span className="font-medium text-white">{plan.testLimit}</span>
-                  </div>
-                  <div className="text-xs text-gray-400">{plan.modelAccess}</div>
-                </div>
-              </div>
+                )}
 
-              {/* Features List */}
-              <div className="space-y-3 mb-8">
-                {plan.features.map((feature, index) => (
-                  <div key={index} className="flex items-start gap-3">
-                    <div
-                      className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center mt-0.5 ${
-                        feature.included ? "bg-green-500/20" : "bg-red-500/20"
+                <Card
+                  className={`group relative p-8 bg-gradient-to-br from-gray-900/50 to-gray-800/30 border backdrop-blur-xl transition-all duration-500 rounded-2xl ${
+                    isScale
+                      ? "scale-105 shadow-2xl shadow-yellow-500/20 ring-2 ring-yellow-500/30 border-yellow-500/40"
+                      : `${accentClasses.border} hover:scale-105 shadow-xl ${accentClasses.glow}`
+                  } ${isVisible ? "animate-slide-up" : "opacity-0 translate-y-8"}`}
+                  style={{ animationDelay: `${index * 150}ms` }}
+                >
+                  {/* Animated Background Effect */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-violet-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                  <div className="relative z-10">
+                    {/* Plan Header */}
+                    <div className="text-center mb-8">
+                      <div className="flex items-center justify-center gap-3 mb-4">
+                        <h3 className="text-2xl font-bold text-white group-hover:text-blue-300 transition-colors">
+                          {plan.name}
+                        </h3>
+                        <span className="text-2xl group-hover:scale-110 transition-transform duration-300">
+                          {plan.emoji}
+                        </span>
+                      </div>
+                      <p className="text-gray-400 text-sm mb-6 group-hover:text-gray-300 transition-colors leading-relaxed">
+                        {plan.description}
+                      </p>
+
+                      {/* Price */}
+                      <div className="mb-6">
+                        <div className="flex items-baseline justify-center gap-1">
+                          <span className="text-4xl font-black text-white group-hover:text-blue-300 transition-colors">
+                            {plan.price}
+                          </span>
+                          <span className="text-gray-400 text-lg group-hover:text-gray-300 transition-colors">
+                            {plan.priceDetail}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Key Metrics */}
+                      <div className="space-y-3 mb-6 p-4 bg-gradient-to-r from-blue-500/10 to-violet-500/10 rounded-xl border border-blue-500/20 group-hover:border-blue-400/30 transition-colors duration-300">
+                        <div className="text-sm text-gray-300 group-hover:text-white transition-colors">
+                          <span className="font-semibold text-white">{plan.testLimit}</span>
+                        </div>
+                        <div className="text-xs text-gray-400 group-hover:text-gray-300 transition-colors">
+                          {plan.modelAccess}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Features List */}
+                    <div className="space-y-3 mb-8">
+                      {plan.features.map((feature, featureIndex) => (
+                        <div key={featureIndex} className="flex items-start gap-3">
+                          <div
+                            className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center mt-0.5 transition-all duration-300 ${
+                              feature.included
+                                ? "bg-green-500/20 group-hover:bg-green-500/30 group-hover:scale-110"
+                                : "bg-red-500/20"
+                            }`}
+                          >
+                            {feature.included ? (
+                              <Check className="w-3 h-3 text-green-400" />
+                            ) : (
+                              <X className="w-3 h-3 text-red-400" />
+                            )}
+                          </div>
+                          <div className="flex items-start gap-2 flex-1">
+                            {feature.icon && (
+                              <feature.icon
+                                className={`w-4 h-4 mt-0.5 transition-colors duration-300 ${
+                                  feature.included ? "text-gray-300 group-hover:text-white" : "text-gray-500"
+                                }`}
+                              />
+                            )}
+                            <span
+                              className={`text-sm leading-relaxed transition-colors duration-300 ${
+                                feature.included
+                                  ? feature.highlight
+                                    ? "text-white font-medium group-hover:text-blue-300"
+                                    : "text-gray-300 group-hover:text-white"
+                                  : "text-gray-500 line-through"
+                              }`}
+                            >
+                              {feature.text}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* CTA Button */}
+                    <Button
+                      onClick={() => handlePlanSelection(plan)}
+                      variant={plan.buttonVariant}
+                      size="lg"
+                      className={`w-full font-semibold rounded-xl transition-all duration-300 hover:scale-105 ${accentClasses.button} ${
+                        plan.buttonVariant === "outline" ? "bg-transparent" : ""
                       }`}
                     >
-                      {feature.included ? (
-                        <Check className="w-3 h-3 text-green-400" />
-                      ) : (
-                        <X className="w-3 h-3 text-red-400" />
-                      )}
-                    </div>
-                    <div className="flex items-start gap-2 flex-1">
-                      {feature.icon && (
-                        <feature.icon
-                          className={`w-4 h-4 mt-0.5 ${feature.included ? "text-gray-300" : "text-gray-500"}`}
-                        />
-                      )}
-                      <span
-                        className={`text-sm leading-relaxed ${
-                          feature.included
-                            ? feature.highlight
-                              ? "text-white font-medium"
-                              : "text-gray-300"
-                            : "text-gray-500 line-through"
-                        }`}
-                      >
-                        {feature.text}
-                      </span>
-                    </div>
+                      {plan.buttonText}
+                    </Button>
+
+                    {/* Additional Info for Enterprise Plan */}
+                    {plan.id === "enterprise" && (
+                      <div className="mt-4 text-center">
+                        <p className="text-xs text-gray-400 group-hover:text-gray-300 transition-colors">
+                          Custom pricing available for enterprise needs
+                        </p>
+                      </div>
+                    )}
                   </div>
-                ))}
+                </Card>
               </div>
-
-              {/* CTA Button */}
-              <Button
-                onClick={() => handlePlanSelection(plan)}
-                variant={plan.buttonVariant}
-                size="lg"
-                className={`w-full font-semibold rounded-xl transition-all duration-300 ${accentClasses.button} ${
-                  plan.buttonVariant === "outline" ? "bg-transparent hover:scale-105" : ""
-                }`}
-              >
-                {plan.buttonText}
-              </Button>
-
-              {/* Additional Info for Enterprise Plan */}
-              {plan.id === "enterprise" && (
-                <div className="mt-4 text-center">
-                  <p className="text-xs text-gray-400">Custom pricing available for enterprise needs</p>
-                </div>
-              )}
-            </Card>
-          )
-        })}
+            )
+          })}
+        </div>
       </div>
 
       {/* Additional Info */}
-      <div className="text-center mt-12 space-y-4">
-        <p className="text-gray-400 text-sm">
+      <div className="text-center mt-16 space-y-6">
+        <p className="text-gray-400 text-sm group-hover:text-gray-300 transition-colors">
           All plans include secure data handling • Cancel anytime • 14-day free trial on paid plans
         </p>
-        <div className="flex items-center justify-center gap-8 text-xs text-gray-500">
-          <div className="flex items-center gap-1">
-            <Shield className="w-4 h-4" />
-            <span>SOC 2 Compliant</span>
+        <div className="flex flex-wrap items-center justify-center gap-8 text-xs">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-gradient-to-r from-blue-500/10 to-violet-500/10 border border-blue-500/20 backdrop-blur-xl">
+            <Shield className="w-4 h-4 text-blue-400 animate-pulse" />
+            <span className="text-blue-300">SOC 2 Compliant</span>
           </div>
-          <div className="flex items-center gap-1">
-            <Clock className="w-4 h-4" />
-            <span>99.9% Uptime SLA</span>
+          <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 backdrop-blur-xl">
+            <Clock className="w-4 h-4 text-green-400 animate-pulse" />
+            <span className="text-green-300">99.9% Uptime SLA</span>
           </div>
-          <div className="flex items-center gap-1">
-            <Database className="w-4 h-4" />
-            <span>Data Export Available</span>
+          <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-gradient-to-r from-purple-500/10 to-violet-500/10 border border-purple-500/20 backdrop-blur-xl">
+            <Database className="w-4 h-4 text-purple-400 animate-pulse" />
+            <span className="text-purple-300">Data Export Available</span>
           </div>
         </div>
       </div>

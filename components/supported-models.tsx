@@ -1,53 +1,46 @@
 "use client"
 
 import { Card } from "@/components/ui/card"
+import { Cpu } from "lucide-react"
 
 const models = [
   {
     name: "GPT-4",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg",
     company: "OpenAI",
     color: "from-green-500 to-emerald-600",
   },
   {
     name: "Claude 3",
-    logo: "https://cdn.brandfetch.io/idmJWF3N06/theme/dark/symbol.svg?c=1dxbfHSJFAPEGdCLU4o5B",
     company: "Anthropic",
     color: "from-orange-500 to-red-600",
   },
   {
     name: "Mistral",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Mistral_AI_logo_%282025%E2%80%93%29.svg/768px-Mistral_AI_logo_%282025%E2%80%93%29.svg.png",
     company: "Mistral AI",
     color: "from-blue-500 to-indigo-600",
   },
   {
     name: "LLaMA 2",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg",
     company: "Meta",
     color: "from-purple-500 to-pink-600",
   },
   {
     name: "Gemini",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/8/8a/Google_Gemini_logo.svg",
     company: "Google",
     color: "from-yellow-500 to-orange-600",
   },
   {
     name: "CodeLlama",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg",
     company: "Meta",
     color: "from-cyan-500 to-blue-600",
   },
   {
     name: "PaLM 2",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg",
     company: "Google",
     color: "from-indigo-500 to-purple-600",
   },
   {
     name: "Cohere",
-    logo: "https://avatars.githubusercontent.com/u/59123956?s=200&v=4",
     company: "Cohere",
     color: "from-pink-500 to-rose-600",
   },
@@ -55,47 +48,56 @@ const models = [
 
 export function SupportedModels() {
   return (
-    <section className="py-24 px-6 bg-gradient-to-b from-gray-900/50 to-black">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-            Supported LLMs
+    <section className="py-32 px-6 relative">
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-950/10 to-transparent" />
+
+      <div className="max-w-7xl mx-auto relative z-10">
+        <div className="text-center mb-20">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border border-purple-500/20 backdrop-blur-xl mb-6">
+            <Cpu className="w-4 h-4 text-purple-400" />
+            <span className="text-sm text-purple-200 font-medium">AI Models</span>
+          </div>
+
+          <h2 className="text-5xl md:text-7xl font-black mb-8 bg-gradient-to-r from-white via-purple-200 to-indigo-200 bg-clip-text text-transparent">
+            300+ Models
+            <br />
+            <span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
+              Supported
+            </span>
           </h2>
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto">Compare the top AI models on the market</p>
+          <p className="text-xl md:text-2xl text-slate-300 max-w-3xl mx-auto">
+            Compare the top AI models from leading companies
+          </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-6 mb-16">
           {models.map((model, index) => (
             <Card
               key={model.name}
-              className="p-4 bg-white/5 border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all duration-300 hover:scale-110 group"
+              className="group p-6 bg-gradient-to-br from-slate-900/50 to-slate-800/50 border border-purple-500/20 backdrop-blur-xl hover:bg-gradient-to-br hover:from-purple-500/10 hover:to-indigo-500/10 transition-all duration-500 hover:scale-110 hover:border-purple-400/30 rounded-2xl"
             >
-              <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center mb-3 mx-auto group-hover:scale-110 transition-transform duration-300 shadow-lg p-2">
-                <img
-                  src={model.logo || "/placeholder.svg"}
-                  alt={`${model.company} logo`}
-                  className="w-full h-full object-contain"
-                  onError={(e) => {
-                    // Fallback en cas d'erreur de chargement
-                    const target = e.target as HTMLImageElement
-                    target.src = `/placeholder.svg?height=48&width=48&text=${model.company.charAt(0)}`
-                  }}
-                />
+              <div
+                className={`w-12 h-12 bg-gradient-to-r ${model.color} rounded-xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300 shadow-lg`}
+              >
+                <span className="text-white font-bold text-lg">{model.company.charAt(0)}</span>
               </div>
-              <h3 className="text-center font-medium text-white text-sm group-hover:text-purple-300 transition-colors">
+              <h3 className="text-center font-bold text-white text-sm group-hover:text-purple-300 transition-colors mb-1">
                 {model.name}
               </h3>
-              <p className="text-center text-xs text-gray-400 mt-1 group-hover:text-gray-300 transition-colors">
+              <p className="text-center text-xs text-slate-400 group-hover:text-slate-300 transition-colors">
                 {model.company}
               </p>
             </Card>
           ))}
         </div>
 
-        <div className="text-center mt-12">
-          <p className="text-gray-400">
-            <span className="text-purple-400 font-semibold">300+ models</span> supported and growing
-          </p>
+        <div className="text-center">
+          <div className="inline-flex items-center gap-4 px-8 py-4 rounded-2xl bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border border-purple-500/20 backdrop-blur-xl">
+            <span className="text-2xl font-black bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
+              300+
+            </span>
+            <span className="text-slate-300 font-medium">models supported and growing</span>
+          </div>
         </div>
       </div>
     </section>

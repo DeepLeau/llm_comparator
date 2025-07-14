@@ -1,14 +1,14 @@
 "use client"
 
 import { Card } from "@/components/ui/card"
-import { CheckCircle, Zap, Target, Shield } from "lucide-react"
+import { CheckCircle, Zap, Target, Shield, TrendingUp } from "lucide-react"
 
 const benefits = [
   {
     icon: CheckCircle,
     title: "No Technical Jargon",
     description: "Plain English results you can actually understand and use immediately",
-    color: "from-green-500 to-emerald-600",
+    color: "from-emerald-500 to-teal-600",
   },
   {
     icon: Zap,
@@ -32,60 +32,74 @@ const benefits = [
 
 export function ClaritySection() {
   return (
-    <section className="py-24 px-6 bg-gradient-to-b from-gray-900/50 to-black">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-            Don't Get Lost in the AI Jungle
+    <section className="py-32 px-6 relative">
+      {/* Background effects */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-950/10 to-transparent" />
+
+      <div className="max-w-7xl mx-auto relative z-10">
+        <div className="text-center mb-20">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border border-purple-500/20 backdrop-blur-xl mb-6">
+            <TrendingUp className="w-4 h-4 text-purple-400" />
+            <span className="text-sm text-purple-200 font-medium">Why Choose Us</span>
+          </div>
+
+          <h2 className="text-5xl md:text-7xl font-black mb-8 bg-gradient-to-r from-white via-purple-200 to-indigo-200 bg-clip-text text-transparent">
+            Don't Get Lost in the
+            <br />
+            <span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
+              AI Jungle
+            </span>
           </h2>
-          <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl md:text-2xl text-slate-300 max-w-4xl mx-auto leading-relaxed">
             While others drown you in technical specs and confusing metrics, we deliver
             <span className="text-purple-400 font-semibold"> crystal-clear insights</span> that actually help you choose
             the right AI for your business.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
           {benefits.map((benefit, index) => (
             <Card
               key={benefit.title}
-              className="p-6 bg-white/5 border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all duration-300 group hover:scale-105"
+              className="group p-8 bg-gradient-to-br from-slate-900/50 to-slate-800/50 border border-purple-500/20 backdrop-blur-xl hover:bg-gradient-to-br hover:from-purple-500/10 hover:to-indigo-500/10 transition-all duration-500 hover:scale-105 hover:border-purple-400/30"
             >
               <div
-                className={`w-12 h-12 bg-gradient-to-r ${benefit.color} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}
+                className={`w-16 h-16 bg-gradient-to-r ${benefit.color} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg`}
               >
-                <benefit.icon className="w-6 h-6 text-white" />
+                <benefit.icon className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-lg font-semibold text-white mb-3 group-hover:text-purple-300 transition-colors">
+              <h3 className="text-xl font-bold text-white mb-4 group-hover:text-purple-300 transition-colors">
                 {benefit.title}
               </h3>
-              <p className="text-gray-400 text-sm leading-relaxed group-hover:text-gray-300 transition-colors">
+              <p className="text-slate-400 leading-relaxed group-hover:text-slate-300 transition-colors">
                 {benefit.description}
               </p>
             </Card>
           ))}
         </div>
 
-        {/* Call-out Box */}
-        <Card className="p-8 bg-gradient-to-r from-purple-900/20 to-blue-900/20 border-purple-500/20 backdrop-blur-sm">
+        {/* Enhanced Call-out Box */}
+        <Card className="p-12 bg-gradient-to-r from-purple-900/30 via-violet-900/20 to-indigo-900/30 border border-purple-500/30 backdrop-blur-xl rounded-3xl shadow-2xl">
           <div className="text-center">
-            <h3 className="text-2xl font-bold text-white mb-4">Stop Wasting Time on Complex Comparisons</h3>
-            <p className="text-lg text-gray-300 max-w-3xl mx-auto leading-relaxed">
+            <h3 className="text-3xl md:text-4xl font-black text-white mb-6">
+              Stop Wasting Time on Complex Comparisons
+            </h3>
+            <p className="text-xl text-slate-300 max-w-4xl mx-auto leading-relaxed mb-8">
               Every minute spent deciphering technical documentation is a minute not spent growing your business. Get{" "}
               <span className="text-purple-400 font-semibold">actionable answers</span>, not academic papers.
             </p>
-            <div className="flex items-center justify-center gap-8 mt-8 text-sm text-gray-400">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span>Simple Results</span>
+            <div className="flex flex-wrap items-center justify-center gap-8 text-sm">
+              <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
+                <span className="text-emerald-300 font-medium">Simple Results</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span>Real Performance</span>
+              <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20">
+                <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+                <span className="text-blue-300 font-medium">Real Performance</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                <span>Business Impact</span>
+              <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20">
+                <div className="w-3 h-3 bg-purple-500 rounded-full animate-pulse"></div>
+                <span className="text-purple-300 font-medium">Business Impact</span>
               </div>
             </div>
           </div>
