@@ -110,7 +110,7 @@ export function TestHistoryTable({
             <p>You haven't run any tests yet. Start your first comparison to see results here.</p>
             <Button
               className="mt-4 bg-blue-600 hover:bg-blue-700 text-white"
-              onClick={() => (window.location.href = "/compare")}
+              onClick={() => (window.location.href = "/use-case-selection")}
             >
               Start Your First Test
             </Button>
