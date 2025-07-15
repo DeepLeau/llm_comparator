@@ -26,8 +26,27 @@ export function ContactForm() {
     e.preventDefault()
     setIsSubmitting(true)
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 2000))
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      })
+
+      const data = await res.json()
+
+      if (data.success) {
+        setIsSubmitted(true)
+      } else {
+        console.error("Email failed to send:", data.error)
+        alert("An error occurred while sending your message.")
+      }
+    } catch (err) {
+      console.error("Unexpected error:", err)
+      alert("An unexpected error occurred.")
+    }
 
     setIsSubmitting(false)
     setIsSubmitted(true)
@@ -116,7 +135,7 @@ export function ContactForm() {
               </SelectTrigger>
               <SelectContent className="bg-gray-800 border-gray-700">
                 <SelectItem value="general">General Inquiry</SelectItem>
-                <SelectItem value="pricing">Pricing Questions</SelectItem>
+                <SelectItem value="api">Automated scoring</SelectItem>
                 <SelectItem value="technical">Technical Support</SelectItem>
                 <SelectItem value="partnership">Partnership</SelectItem>
                 <SelectItem value="feature">Feature Request</SelectItem>

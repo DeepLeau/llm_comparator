@@ -11,8 +11,8 @@ export default function ContactPage() {
               <img src="/logo.png?height=32&width=32" alt="Logo" className="w-8 h-8 rounded" />
               <span className="text-lg font-semibold text-white">WhichLLMs</span>
             </div>
-            <a href="/" className="text-gray-400 hover:text-white transition-colors">
-              Back to Home
+            <a href="/dashboard" className="text-gray-400 hover:text-white transition-colors">
+              Back to Dashboard
             </a>
           </div>
         </div>

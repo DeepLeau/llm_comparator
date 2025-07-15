@@ -7,7 +7,7 @@ import { Zap, ArrowRight, Layers, Clock, BarChart3 } from "lucide-react"
 
 export function BatchTestingCTA() {
   const handleStartBatchTest = () => {
-    window.location.href = "/use-case-selection"
+    window.location.href = "/contact"
   }
 
   const handleLearnMore = () => {

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Zap, Settings, LogOut } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 
 export function TopNavigation() {
   const [user, setUser] = useState<any>(null)
@@ -73,12 +74,12 @@ export function TopNavigation() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center gap-3">
+          <Link href="/dashboard" className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center">
               <img src="/logo.png" alt="Logo" className="rounded" />
             </div>
             <span className="text-xl font-bold text-white">WhichLLMs</span>
-          </div>
+          </Link>
 
           {/* User Info & Actions */}
           <div className="flex items-center gap-4">

@@ -125,6 +125,7 @@ export function StartTestButton() {
           selectedModelIds: state.selectedModels.map((m) => m.id),
           systemPrompt,
           prompts: userPrompts,
+          useCase: state.selectedUseCase.id,
         }),
       })
 
