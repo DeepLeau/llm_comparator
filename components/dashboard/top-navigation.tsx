@@ -84,6 +84,16 @@ export function TopNavigation() {
           <div className="flex items-center gap-4">
             {userProfile && (
               <>
+                {/* Start New Test Button */}
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => router.push("/use-case-selection")}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  Start new test
+                </Button>
+
                 {/* Credits */}
                 <div className="flex items-center gap-2 text-sm">
                   <span className="text-gray-400">Credits:</span>
