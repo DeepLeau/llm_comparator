@@ -30,21 +30,20 @@ export function BatchTestingCTA() {
                 <Zap className="w-4 h-4 text-white" />
               </div>
               <Badge variant="secondary" className="bg-purple-600/20 text-purple-300 border-purple-600/30">
-                Launch a New Multi-Model Test
+                Automated testing
               </Badge>
             </div>
 
-            <h3 className="text-2xl font-bold text-white mb-2">Ready for Batch Testing?</h3>
+            <h3 className="text-2xl font-bold text-white mb-2">Ready for automated testing?</h3>
             <p className="text-gray-300 mb-4 max-w-2xl">
-              Enter multiple prompts and test them across dozens of models simultaneously. Perfect for comprehensive
-              evaluations and A/B testing at scale.
+              Schedule recurring LLM tests (daily, weekly, monthly) and get real-time routing to the best model via API for your specific use-case.
             </p>
 
             {/* Features */}
             <div className="flex flex-wrap justify-center lg:justify-start gap-4 mb-6">
               <div className="flex items-center gap-2 text-sm text-gray-400">
                 <Layers className="w-4 h-4 text-blue-400" />
-                Specific Use Cases
+                Scheduled LLM benchmarking
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-400">
                 <Clock className="w-4 h-4 text-green-400" />
@@ -52,7 +51,7 @@ export function BatchTestingCTA() {
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-400">
                 <BarChart3 className="w-4 h-4 text-purple-400" />
-                Advanced Analytics
+                Automatic scoring
               </div>
             </div>
           </div>
@@ -63,7 +62,7 @@ export function BatchTestingCTA() {
               onClick={handleStartBatchTest}
               className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg hover:shadow-purple-500/25 transition-all duration-200"
             >
-              Start Batch Test
+              Contact us
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
             <Button
