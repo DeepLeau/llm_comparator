@@ -31,14 +31,6 @@ export function PromptInputHeader({ estimatedCost, onBack }: PromptInputHeaderPr
               <span className="font-medium">Back</span>
             </button>
           </div>
-
-          {/* Right side - Estimated Cost */}
-          <div className="flex items-center gap-2">
-            <span className="text-gray-400 text-sm">Estimated Cost:</span>
-            <div className="bg-gray-800/50 px-3 py-1.5 rounded-lg border border-gray-700">
-              <span className="text-green-400 font-semibold">${estimatedCost.toFixed(2)}</span>
-            </div>
-          </div>
         </div>
       </div>
     </div>

@@ -10,6 +10,15 @@ const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, proces
   },
 })
 
+// Définition des limites de tests par batch selon le plan
+const PLAN_LIMITS = {
+  free: 3,
+  start: 10,
+  scale: 50,
+} as const
+
+type PlanType = keyof typeof PLAN_LIMITS
+
 interface TestModelRequest {
   selectedModelIds: string[]
   systemPrompt: string
@@ -67,8 +76,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No valid prompts provided" }, { status: 400 })
     }
 
-    // Récupérer l'utilisateur authentifié pour la sauvegarde
+    // Calculer le nombre total de tests (modèles × prompts)
+    const totalTests = selectedModelIds.length * validPrompts.length
+
+    // Récupérer l'utilisateur authentifié
     let userId: string | null = null
+    let userPlan: PlanType = "free"
+
     try {
       const authHeader = request.headers.get("authorization")
       if (authHeader?.startsWith("Bearer ")) {
@@ -76,11 +90,38 @@ export async function POST(request: NextRequest) {
         const {
           data: { user },
         } = await supabaseAdmin.auth.getUser(token)
-        userId = user?.id || null
+
+        if (user) {
+          userId = user.id
+
+          // Récupérer le plan de l'utilisateur
+          const { data: userData } = await supabaseAdmin.from("users").select("plan").eq("id", user.id).single()
+
+          userPlan = (userData?.plan as PlanType) || "free"
+        }
       }
     } catch (error) {
       console.warn("Could not get user from token, continuing without user ID")
     }
+
+    // VÉRIFICATION CRITIQUE : Limite de tests par batch selon le plan
+    const testLimit = PLAN_LIMITS[userPlan]
+    if (totalTests > testLimit) {
+      console.error(
+        `❌ PLAN LIMIT EXCEEDED: User plan '${userPlan}' allows max ${testLimit} tests, but ${totalTests} requested`,
+      )
+      return NextResponse.json(
+        {
+          error: `Plan limit exceeded. Your ${userPlan} plan allows maximum ${testLimit} tests per batch, but you requested ${totalTests} tests.`,
+          planLimit: testLimit,
+          requestedTests: totalTests,
+          userPlan,
+        },
+        { status: 403 },
+      )
+    }
+
+    console.log(`✅ Plan check passed: ${totalTests} tests within ${userPlan} plan limit of ${testLimit}`)
 
     // Récupérer les modèles depuis Supabase
     const { data: models, error: modelsError } = await supabase.from("models").select("*").in("id", selectedModelIds)
@@ -472,6 +513,9 @@ Réponds UNIQUEMENT avec les notes séparées par des virgules, dans l'ordre des
     console.log("=== MULTI-PROMPT TEST COMPLETED ===")
     console.log("Stats:", stats)
     console.log("Test ID:", testId)
+    console.log("User Plan:", userPlan)
+    console.log("Plan Limit:", testLimit)
+    console.log("Tests Executed:", totalTests)
     console.log(
       "Results summary:",
       results.map((r) => ({
@@ -493,6 +537,8 @@ Réponds UNIQUEMENT avec les notes séparées par des virgules, dans l'ordre des
       prompts: validPrompts,
       timestamp: new Date().toISOString(),
       testId, // Retourner l'ID du test créé
+      userPlan, // Retourner le plan utilisateur pour info
+      planLimit: testLimit, // Retourner la limite du plan
     })
   } catch (error) {
     console.error("❌ Error in multi-prompt test-models API:", error)

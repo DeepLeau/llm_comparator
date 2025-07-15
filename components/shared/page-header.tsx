@@ -24,12 +24,6 @@ export function PageHeader({ title, onBack, estimatedCost }: PageHeaderProps) {
               Back
             </Button>
           </div>
-
-          {estimatedCost && (
-            <div className="text-sm font-medium text-white">
-              Estimated Cost: <span className="text-green-400">{estimatedCost}</span>
-            </div>
-          )}
         </div>
       </div>
     </div>

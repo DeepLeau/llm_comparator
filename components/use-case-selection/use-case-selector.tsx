@@ -94,7 +94,7 @@ export function UseCaseSelector() {
   const [selectedUseCaseId, setSelectedUseCaseId] = useState<string | null>(state.selectedUseCase?.id || null)
 
   const handleBack = () => {
-    router.push("/")
+    router.push("/dashboard")
   }
 
   const handleContinue = () => {
