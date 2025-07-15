@@ -16,6 +16,7 @@ import {
   Database,
   Sparkles,
   TestTube,
+  FlaskConical,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -62,7 +63,7 @@ const plans: PricingPlan[] = [
       { text: "50 scorings", included: true, icon: Zap },
       { text: "Manual trigger", included: true, icon: Shield },
       { text: "Basic dashboard", included: true, icon: BarChart3 },
-      { text: "Summary emails", included: false, icon: X },
+      { text: "3 tests per batch", included: true, icon: FlaskConical },
       { text: "Queue priority", included: false, icon: X },
       { text: "Routing API access", included: false, icon: X },
       { text: "AI automations", included: false, icon: X },
@@ -89,7 +90,7 @@ const plans: PricingPlan[] = [
       { text: "500 scorings", included: true, icon: Zap, highlight: true },
       { text: "Manual trigger", included: true, icon: Shield },
       { text: "Test history", included: true, icon: BarChart3 },
-      { text: "Summary emails", included: false, icon: X },
+      { text: "10 tests per batch", included: true, icon: FlaskConical },
       { text: "Queue priority", included: false, icon: X },
       { text: "Routing API access", included: false, icon: X },
       { text: "AI automations", included: false, icon: X },
@@ -116,7 +117,7 @@ const plans: PricingPlan[] = [
       { text: "1,500 scorings", included: true, icon: Zap, highlight: true },
       { text: "Manual trigger", included: true, icon: Shield },
       { text: "Test history", included: true, icon: BarChart3 },
-      { text: "Weekly summary emails", included: true, icon: Mail, highlight: true },
+      { text: "50 tests per batch", included: true, icon: FlaskConical },
       { text: "Medium queue priority", included: true, icon: Clock },
       { text: "Routing API access", included: false, icon: X },
       { text: "AI automations", included: false, icon: X },
@@ -143,7 +144,7 @@ const plans: PricingPlan[] = [
       { text: "Custom scoring volume", included: true, icon: Zap, highlight: true },
       { text: "Automated testing", included: true, icon: Clock, highlight: true },
       { text: "Test history", included: true, icon: Database, highlight: true },
-      { text: "Custom frequency emails", included: true, icon: Mail },
+      { text: "Custom tests per batch", included: true, icon: FlaskConical },
       { text: "Maximum queue priority", included: true, icon: Sparkles },
       { text: "Full routing API access", included: true, icon: Database, highlight: true },
       { text: "Intelligent routing", included: true, icon: Building, highlight: true },

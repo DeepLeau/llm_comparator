@@ -18,6 +18,10 @@ const faqItems: FAQItem[] = [
     answer: "You launch the evaluation manually from your dashboard when you want to test your prompts.",
   },
   {
+    question: 'What is a batch test?',
+    answer: "A batch test allows you to evaluate multiple prompts at once across several AI models. Instead of testing prompts one by one, you can send a group of them in a single batch and receive scored results instantly.",
+  },
+  {
     question: 'What is "Automated testing" in the Enterprise plan?',
     answer:
       "Your tests are automatically run at defined intervals (hourly, daily...) to keep model performance up to date.",
