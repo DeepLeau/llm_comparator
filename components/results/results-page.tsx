@@ -12,7 +12,7 @@ import { ModelOutputSection } from "./model-output-section"
 import { ResultsPagination } from "./results-pagination"
 import { getCurrentTestSession } from "@/lib/test-results"
 
-const ITEMS_PER_PAGE = 10
+const ITEMS_PER_PAGE = 5
 
 export function ResultsPage() {
   const router = useRouter()
@@ -32,14 +32,19 @@ export function ResultsPage() {
 
   // Load test session
   useEffect(() => {
-    const session = getCurrentTestSession()
+  const loadSession = async () => {
+    const session = await getCurrentTestSession()
+    console.log("Loaded test session:", session)
     if (session) {
       setTestSession(session)
     } else {
-      console.log("No test session found, redirecting to use case selection")
-      router.push("/use-case-selection")
+      console.log("No test session found, redirecting to dashboard")
+      router.push("/dashboard")
     }
-  }, [router])
+  }
+
+  loadSession()
+}, [router])
 
   // Convert test results to individual prompt results for Model Outputs section
   const allIndividualResults = useMemo(() => {
