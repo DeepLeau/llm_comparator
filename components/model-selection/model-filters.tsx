@@ -243,13 +243,13 @@ export function ModelFilters({
               value={[maxInputPriceFilter]}
               onValueChange={(value) => onMaxInputPriceChange(value[0])}
               max={1}
-              min={0.000001}
+              min={0}
               step={0.000001}
               className="w-full"
             />
             <div className="flex justify-between text-xs text-gray-500">
-              <span>$0.000001</span>
-              <span>$1.000</span>
+              <span>$0</span>
+              <span>$1</span>
             </div>
           </div>
 
@@ -262,13 +262,13 @@ export function ModelFilters({
               value={[maxOutputPriceFilter]}
               onValueChange={(value) => onMaxOutputPriceChange(value[0])}
               max={1}
-              min={0.000001}
+              min={0}
               step={0.000001}
               className="w-full"
             />
             <div className="flex justify-between text-xs text-gray-500">
-              <span>$0.000001</span>
-              <span>$1.000</span>
+              <span>$0</span>
+              <span>$1</span>
             </div>
           </div>
         </div>

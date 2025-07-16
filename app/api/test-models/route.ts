@@ -12,9 +12,9 @@ const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, proces
 
 // Définition des limites de tests par batch selon le plan
 const PLAN_LIMITS = {
-  free: 3,
-  start: 10,
-  scale: 50,
+  free: 2,
+  start: 5,
+  scale: 10,
 } as const
 
 type PlanType = keyof typeof PLAN_LIMITS
