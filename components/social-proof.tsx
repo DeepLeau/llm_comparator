@@ -151,7 +151,7 @@ export function SocialProof() {
         {/* Animated Stats - Updated */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-md mx-auto">
           {[
-            { value: "300+", label: "Models Tested", color: "from-blue-500 to-violet-500" },
+            { value: "200+", label: "Models Tested", color: "from-blue-500 to-violet-500" },
             { value: "99.9%", label: "Satisfaction Rate", color: "from-cyan-400 to-blue-400" },
           ].map((stat, index) => (
             <div

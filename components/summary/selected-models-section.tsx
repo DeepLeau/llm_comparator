@@ -36,9 +36,9 @@ export function SelectedModelsSection({ models = [] }: SelectedModelsSectionProp
                       : "bg-blue-600/20 text-blue-300 border-blue-600/30"
                   }
                 >
-                  {model.license === "open-source" ? "Open Source" : "Propriétaire"}
+                  {model.license === "open-source" ? "Open Source" : "Proprietary"}
                 </Badge>
-                <span className="text-sm text-gray-400">${model.costPer1kTokens}/1k tokens</span>
+                <span className="text-sm text-gray-400">${model.costPer1kTokens*1000}/1k tokens</span>
               </div>
             </div>
           </div>

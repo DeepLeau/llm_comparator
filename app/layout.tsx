@@ -10,7 +10,7 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "WhichLLMs - Compare every LLM. Find the best for your use case.",
   description:
-    "Free tool that compares 300+ AI models (GPT-4, Claude, Mistral, LLaMA, Gemini) on your real use cases. Automatic scoring and smart recommendation.",
+    "Free tool that compares 200+ AI models (GPT-4, Claude, Mistral, LLaMA, Gemini) on your real use cases. Automatic scoring and smart recommendation.",
   generator: "v0.dev",
 }
 

@@ -9,7 +9,7 @@ const solutions = [
   {
     icon: Zap,
     title: "Instant Comparison",
-    description: "Test 300+ models simultaneously in seconds",
+    description: "Test 200+ models simultaneously in seconds",
     benefit: "Save 40+ hours of research",
     color: "from-blue-500 to-cyan-500",
   },
@@ -196,19 +196,6 @@ export function SolutionShowcase() {
               ))}
             </ul>
           </Card>
-        </div>
-
-        {/* Animated CTA */}
-        <div className="text-center">
-          <Button
-            size="lg"
-            className={`group relative bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white px-12 py-6 text-xl font-bold rounded-2xl shadow-2xl shadow-blue-500/25 transition-all duration-300 hover:scale-105 overflow-hidden ${isVisible ? "animate-bounce-in animation-delay-1000" : "opacity-0"}`}
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-shimmer" />
-            <Sparkles className="mr-3 w-6 h-6 group-hover:animate-spin" />
-            See It In Action
-            <ArrowRight className="ml-3 w-6 h-6 group-hover:translate-x-1 transition-transform" />
-          </Button>
         </div>
       </div>
     </section>

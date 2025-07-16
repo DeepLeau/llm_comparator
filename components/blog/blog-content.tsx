@@ -558,7 +558,7 @@ export function BlogContent() {
           <Card className="p-8 bg-gradient-to-r from-blue-500/10 to-violet-500/10 border border-blue-500/20 backdrop-blur-xl rounded-2xl text-center">
             <h4 className="text-white font-semibold mb-4">Ready to Get Started?</h4>
             <p className="text-gray-300 leading-relaxed mb-6">
-              Experience automated LLM scoring with WhichLLMs. Compare 300+ models, set up scheduled benchmarks, and
+              Experience automated LLM scoring with WhichLLMs. Compare 200+ models, set up scheduled benchmarks, and
               optimize your AI applications with confidence.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

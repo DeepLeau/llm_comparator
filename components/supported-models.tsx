@@ -59,7 +59,7 @@ export function SupportedModels() {
           </div>
 
           <h2 className="text-5xl md:text-7xl font-black mb-8 bg-gradient-to-r from-white via-purple-200 to-indigo-200 bg-clip-text text-transparent">
-            300+ Models
+            200+ Models
             <br />
             <span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
               Supported
@@ -94,7 +94,7 @@ export function SupportedModels() {
         <div className="text-center">
           <div className="inline-flex items-center gap-4 px-8 py-4 rounded-2xl bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border border-purple-500/20 backdrop-blur-xl">
             <span className="text-2xl font-black bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
-              300+
+              200+
             </span>
             <span className="text-slate-300 font-medium">models supported and growing</span>
           </div>

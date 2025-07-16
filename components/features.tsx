@@ -7,7 +7,7 @@ const features = [
   {
     icon: Zap,
     title: "One‑Click Comparison",
-    description: "Test your prompt on 300+ models simultaneously in seconds",
+    description: "Test your prompt on 200+ models simultaneously in seconds",
     color: "from-yellow-500 to-orange-600",
   },
   {

@@ -56,7 +56,7 @@ export function PricingHeader() {
         </div>
         <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/10 to-violet-500/10 border border-purple-500/20 backdrop-blur-xl">
           <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" />
-          <span className="text-purple-300 font-medium">14-day free trial</span>
+          <span className="text-purple-300 font-medium">7-day free trial</span>
         </div>
       </div>
     </div>

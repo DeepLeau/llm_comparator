@@ -406,7 +406,7 @@ export function PricingPlans() {
       {/* Additional Info */}
       <div className="text-center mt-16 space-y-6">
         <p className="text-gray-400 text-sm group-hover:text-gray-300 transition-colors">
-          All plans include secure data handling • Cancel anytime • 14-day free trial on paid plans
+          All plans include secure data handling • Cancel anytime • 7-day free trial on paid plans
         </p>
         <div className="flex flex-wrap items-center justify-center gap-8 text-xs">
           <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-gradient-to-r from-blue-500/10 to-violet-500/10 border border-blue-500/20 backdrop-blur-xl">

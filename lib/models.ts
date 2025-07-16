@@ -31,7 +31,13 @@ export interface TestResult {
 
 export async function fetchModels(): Promise<Model[]> {
   try {
-    const { data, error } = await supabase.from("models").select("*").order("name")
+    const { data, error } = await supabase
+  .from("models")
+  .select("*")
+  .gte("request_price", 0)
+  .lte("request_price", 0.0091)
+  .order("name")
+
 
     if (error) {
       console.error("Error fetching models:", error)

@@ -13,7 +13,7 @@ const faqs = [
   {
     question: "Which AI models do you support?",
     answer:
-      "We support 300+ models including GPT-4, Claude 3, Gemini, Mistral, LLaMA, PaLM, Cohere, and many more. We're constantly adding new models as they become available.",
+      "We support 200+ models including GPT-4, Claude 3, Gemini, Mistral, LLaMA, PaLM, Cohere, and many more. We're constantly adding new models as they become available.",
   },
   {
     question: "Is there a free trial?",

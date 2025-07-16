@@ -99,7 +99,7 @@ export function ModelFilters({
 
   const formatPriceLabel = (value: number) => {
     if (value >= 1) return `$${value.toFixed(3)}`
-    if (value >= 0.001) return `$${(value * 1000).toFixed(2)}/1K`
+    if (value >= 0.001) return `$${(value).toFixed(2)}/1K`
     return `$${(value * 1000000).toFixed(1)}/1M`
   }
 
@@ -242,14 +242,14 @@ export function ModelFilters({
             <Slider
               value={[maxInputPriceFilter]}
               onValueChange={(value) => onMaxInputPriceChange(value[0])}
-              max={1}
+              max={5}
               min={0}
               step={0.000001}
               className="w-full"
             />
             <div className="flex justify-between text-xs text-gray-500">
               <span>$0</span>
-              <span>$1</span>
+              <span>$5</span>
             </div>
           </div>
 
@@ -261,14 +261,14 @@ export function ModelFilters({
             <Slider
               value={[maxOutputPriceFilter]}
               onValueChange={(value) => onMaxOutputPriceChange(value[0])}
-              max={1}
+              max={5}
               min={0}
               step={0.000001}
               className="w-full"
             />
             <div className="flex justify-between text-xs text-gray-500">
               <span>$0</span>
-              <span>$1</span>
+              <span>$5</span>
             </div>
           </div>
         </div>
