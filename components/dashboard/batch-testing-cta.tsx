@@ -11,7 +11,7 @@ export function BatchTestingCTA() {
   }
 
   const handleLearnMore = () => {
-    window.location.href = "/pricing"
+    window.location.href = "/blog/automated-llm-scoring"
   }
 
   return (
