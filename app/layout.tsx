@@ -24,6 +24,7 @@ export default function RootLayout({
       <head>
         {/* Script Umami Analytics */}
         <script defer src="https://cloud.umami.is/script.js" data-website-id="13b0cce7-2ec9-49f6-91d4-eafd5bf65588"></script>
+        <link rel="icon" href="/logo.png" type="image/png" />
       </head>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
