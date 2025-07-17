@@ -41,12 +41,12 @@ export function Footer() {
             </h4>
             <ul className="space-y-3 text-gray-400">
               <li>
-                <a href="#" className="hover:text-blue-400 transition-colors hover:translate-x-1 inline-block">
-                  Features
+                <a href="/blog/automated-llm-scoring" className="hover:text-blue-400 transition-colors hover:translate-x-1 inline-block">
+                  Automated Scoring
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-blue-400 transition-colors hover:translate-x-1 inline-block">
+                <a href="/pricing" className="hover:text-blue-400 transition-colors hover:translate-x-1 inline-block">
                   Pricing
                 </a>
               </li>
@@ -68,22 +68,22 @@ export function Footer() {
             <h4 className="text-white font-semibold mb-4">Company</h4>
             <ul className="space-y-3 text-gray-400">
               <li>
-                <a href="#" className="hover:text-blue-400 transition-colors hover:translate-x-1 inline-block">
-                  About
+                <a href="/legal" className="hover:text-blue-400 transition-colors hover:translate-x-1 inline-block">
+                  Legal Notice
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-blue-400 transition-colors hover:translate-x-1 inline-block">
-                  Blog
+                <a href="/terms_of_use" className="hover:text-blue-400 transition-colors hover:translate-x-1 inline-block">
+                  Terms of Use
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-blue-400 transition-colors hover:translate-x-1 inline-block">
-                  Careers
+                <a href="/privacy" className="hover:text-blue-400 transition-colors hover:translate-x-1 inline-block">
+                  Privacy Policy
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-blue-400 transition-colors hover:translate-x-1 inline-block">
+                <a href="/contact" className="hover:text-blue-400 transition-colors hover:translate-x-1 inline-block">
                   Contact
                 </a>
               </li>
