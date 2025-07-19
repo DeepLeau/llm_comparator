@@ -34,7 +34,7 @@ export async function fetchModels(): Promise<Model[]> {
     const { data, error } = await supabase
   .from("models")
   .select("*")
-  .gte("request_price", 0)
+  .gt("request_price", 0)
   .lte("request_price", 0.0091)
   .order("name")
 
