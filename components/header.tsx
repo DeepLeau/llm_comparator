@@ -47,7 +47,7 @@ export function Header() {
               Login
             </Button>
 
-            <Link href="/pricing">
+            <Link href="/early-access">
               <Button
                 size="sm"
                 className="group bg-gradient-to-r from-blue-600/80 to-violet-600/80 hover:from-blue-500/90 hover:to-violet-500/90 text-white shadow-lg shadow-blue-500/20 transition-all duration-300 hover:scale-105 hover:shadow-blue-500/30 backdrop-blur-sm"
