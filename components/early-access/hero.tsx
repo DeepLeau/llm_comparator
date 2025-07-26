@@ -47,7 +47,7 @@ export function Hero() {
         >
           <Badge className="bg-[#361e22] text-red-300 border-red-500/30 px-6 py-3 text-lg font-bold mb-8 hover:scale-110 hover:bg-[#361e22] transition-transform duration-300 shadow-lg shadow-red-500/25">
             <Crown className="w-5 h-5 mr-2 animate-pulse" />
-            Only 46 seats left
+            Only 44 seats left
           </Badge>
         </div>
 
