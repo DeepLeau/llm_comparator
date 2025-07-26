@@ -35,7 +35,7 @@ export async function fetchModels(): Promise<Model[]> {
   .from("models")
   .select("*")
   .gt("request_price", 0)
-  .lte("request_price", 0.0091)
+  .lte("request_price", 0.021)
   .order("name")
 
 
