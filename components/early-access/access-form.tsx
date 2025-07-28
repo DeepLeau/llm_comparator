@@ -7,9 +7,28 @@ import { Send, Sparkles, Lock, Crown } from "lucide-react"
 
 export function AccessForm() {
   const [isVisible, setIsVisible] = useState(false)
+  const [utmSource, setUtmSource] = useState("")
   const sectionRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const utmSourceParam = urlParams.get("utm_source")
+    console.log("Utm Source Param:", utmSourceParam)
+    let source = utmSourceParam || "direct"
+    console.log("Initial Source:", source)
+
+    if (!utmSourceParam && document.referrer) {
+      const referrer = new URL(document.referrer).hostname
+      if (referrer.includes("google")) source = "google"
+      else if (referrer.includes("twitter") || referrer.includes("t.co")) source = "twitter"
+      else if (referrer.includes("linkedin")) source = "linkedin"
+      else if (referrer.includes("facebook")) source = "facebook"
+      else if (referrer.includes("github")) source = "github"
+      else source = referrer
+    }
+
+    setUtmSource(source)
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -67,7 +86,7 @@ export function AccessForm() {
             </p>
           </div>
 
-          {/* Tally Form Embed with Dynamic Background */}
+          {/* Tally Form Embed with Dynamic UTM Source */}
           <div
             className={`relative transform transition-all duration-1000 delay-300 ${isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}
           >
@@ -81,7 +100,7 @@ export function AccessForm() {
               {/* Form Container */}
               <div className="relative z-10 bg-white/98 rounded-2xl p-4 shadow-2xl">
                 <iframe
-                  src="https://tally.so/embed/mOx8WY?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1"
+                  src={`https://tally.so/embed/mOx8WY?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1&utm_source=${encodeURIComponent(utmSource)}`}
                   width="100%"
                   height="600"
                   frameBorder="0"
