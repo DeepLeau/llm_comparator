@@ -175,7 +175,7 @@ export function Hero() {
         <div
           className={`flex flex-col sm:flex-row gap-6 justify-center items-center mb-16 transition-all duration-1000 delay-600 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
         >
-          <Link href="/early-access">
+          <Link href={`/early-access${typeof window !== "undefined" && window.location.search ? window.location.search : ""}`}>
             <Button
               size="lg"
               className="group relative bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white px-12 py-6 text-xl font-bold rounded-2xl shadow-2xl shadow-blue-500/25 transition-all duration-300 hover:scale-105 hover:shadow-blue-500/40 overflow-hidden"
