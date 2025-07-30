@@ -53,6 +53,49 @@ interface ModelResult {
   error?: string
 }
 
+// ✨ VERSION ALTERNATIVE : Sans fonction RPC
+async function handleModelFailures(failedModelIds: string[]) {
+  if (failedModelIds.length === 0) return
+
+  try {
+    console.log(`📊 Updating failure count for ${failedModelIds.length} models:`, failedModelIds)
+
+    // Récupérer les valeurs actuelles des failures
+    const { data: currentModels, error: fetchError } = await supabaseAdmin
+      .from("models")
+      .select("id, failures")
+      .in("id", failedModelIds)
+
+    if (fetchError) {
+      console.error("❌ Error fetching current failure counts:", fetchError)
+      return
+    }
+
+    if (!currentModels || currentModels.length === 0) {
+      console.warn("⚠️ No models found to update")
+      return
+    }
+
+    // Préparer les mises à jour
+    const updatePromises = currentModels.map(async (model) => {
+      const newFailures = Math.max(0, (model.failures || 0) - 1)
+
+      const { error } = await supabaseAdmin.from("models").update({ failures: newFailures }).eq("id", model.id)
+
+      if (error) {
+        console.error(`❌ Error updating model ${model.id}:`, error)
+      } else {
+        console.log(`✅ Updated model ${model.id}: failures ${model.failures} → ${newFailures}`)
+      }
+    })
+
+    await Promise.all(updatePromises)
+    console.log("✅ Successfully updated all failure counts")
+  } catch (error) {
+    console.error("❌ Exception while updating model failures:", error)
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body: TestModelRequest = await request.json()
@@ -152,6 +195,9 @@ export async function POST(request: NextRequest) {
       "X-Title": "WhichLLMs",
     }
 
+    // ✨ NOUVEAU : Tracker les modèles qui échouent
+    const failedModelIds = new Set<string>()
+
     // Tester tous les modèles sur tous les prompts
     console.log("Starting multi-prompt model tests...")
     const modelTestPromises = models.map(async (model) => {
@@ -193,12 +239,16 @@ export async function POST(request: NextRequest) {
             if (!response.ok) {
               const errorText = await response.text()
               console.error(`    ❌ Error for prompt ${promptIndex + 1}:`, response.status, errorText)
+              // ✨ NOUVEAU : Marquer le modèle comme ayant échoué
+              failedModelIds.add(model.id)
               throw new Error(`HTTP ${response.status}: ${errorText}`)
             }
 
             const result = await response.json()
 
             if (!result.choices?.[0]?.message?.content) {
+              // ✨ NOUVEAU : Marquer le modèle comme ayant échoué
+              failedModelIds.add(model.id)
               throw new Error("Invalid response structure")
             }
 
@@ -226,6 +276,8 @@ export async function POST(request: NextRequest) {
             } as ModelPromptResult
           } catch (error) {
             console.error(`    ❌ Error testing prompt ${promptIndex + 1}:`, error)
+            // ✨ NOUVEAU : Marquer le modèle comme ayant échoué
+            failedModelIds.add(model.id)
             return {
               promptIndex,
               prompt,
@@ -275,6 +327,8 @@ export async function POST(request: NextRequest) {
         } as ModelResult
       } catch (error) {
         console.error(`❌ Error testing model ${model.name}:`, error)
+        // ✨ NOUVEAU : Marquer le modèle comme ayant échoué
+        failedModelIds.add(model.id)
         return {
           id: `${model.id}-error-${Date.now()}`,
           modelId: model.id,
@@ -294,6 +348,9 @@ export async function POST(request: NextRequest) {
 
     const results = await Promise.all(modelTestPromises)
     console.log("All model tests completed")
+
+    // ✨ NOUVEAU : Mettre à jour les échecs de modèles en base de données
+    await handleModelFailures(Array.from(failedModelIds))
 
     // Scorer toutes les réponses avec Claude 3 Opus
     console.log("=== STARTING SCORING PHASE ===")
@@ -516,6 +573,7 @@ Réponds UNIQUEMENT avec les notes séparées par des virgules, dans l'ordre des
     console.log("User Plan:", userPlan)
     console.log("Plan Limit:", testLimit)
     console.log("Tests Executed:", totalTests)
+    console.log("Failed Models:", Array.from(failedModelIds)) // ✨ NOUVEAU : Log des modèles échoués
     console.log(
       "Results summary:",
       results.map((r) => ({
@@ -539,6 +597,7 @@ Réponds UNIQUEMENT avec les notes séparées par des virgules, dans l'ordre des
       testId, // Retourner l'ID du test créé
       userPlan, // Retourner le plan utilisateur pour info
       planLimit: testLimit, // Retourner la limite du plan
+      failedModels: Array.from(failedModelIds), // ✨ NOUVEAU : Retourner les modèles échoués
     })
   } catch (error) {
     console.error("❌ Error in multi-prompt test-models API:", error)
